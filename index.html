@@ -581,14 +581,14 @@ const URLC = (()=>{ try{ return (new URLSearchParams(location.search).get("c")||
 const S = fresh();
 function fresh(){ return {view:"home",name:"",feel:{k:null,s:null,r:null},ans:Array(60).fill(0),qi:0,deep:[0,0,0,0],di:0,
   deepOrder:DEEP.map(()=>shuffle([1,2,3,4,5,6,7,8,9])),rec:null,show:0,openType:0,friend:0,teacher:false,from:null,mode:ONLINE&&URLC?"class":null,cls:"",tcls:ONLINE?"":"*",vcls:"",cvFrom:null,
-  aud:"kid",ccode:URLC,tok:null,tname:"",tclasses:[],tlist:[],tform:"login",cvOnline:false,cvList:null,cvMsg:"",tadmin:false,tnote:"",tpwform:false,adm:null,atemp:null}; }
+  aud:"kid",ccode:URLC,tok:null,tname:"",tclasses:[],tlist:[],tform:"login",cvOnline:false,cvList:null,cvMsg:"",tadmin:false,tnote:"",tpwform:false,adm:null,atemp:null,found:null,retake:false,reuseId:null,pin:""}; }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const $app = document.getElementById("app");
 function go(view){ if(view==="home"){ S.rec=null; S.from=null; } S.view=view; saveProgress(); render(); window.scrollTo(0,0); }
 function saveProgress(){
   if(["feel","feel2","calm","quiz","deep"].includes(S.view))
-    store.set("ennea_progress",{view:S.view,name:S.name,mode:S.mode,cls:S.cls,aud:S.aud,feel:S.feel,ans:S.ans,qi:S.qi,deep:S.deep,di:S.di});
+    store.set("ennea_progress",{view:S.view,name:S.name,mode:S.mode,cls:S.cls,aud:S.aud,reuseId:S.reuseId,pin:S.pin,feel:S.feel,ans:S.ans,qi:S.qi,deep:S.deep,di:S.di});
 }
 function toast(msg){ const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2200); }
 
@@ -624,10 +624,19 @@ V.home = () => {
       <button class="chip ${S.aud==="adult"?"sel":""}" style="${S.aud==="adult"?"background:var(--main)":""}" data-act="aud" data-v="adult">🧑 어른</button>
       <span class="sub">${S.aud==="adult"?"어른용 문항과 설명으로 진행해요.":"쉬운 말로 된 문항으로 진행해요."}</span>
     </div>`}
-    <label for="nm"><b>${S.mode==="class"?"이름을 적어 주세요":"이름이나 별명을 적어 주세요"}</b></label>
-    <input id="nm" type="text" maxlength="20" placeholder="${S.mode==="class"?"예: 김하늘":"예: 하늘이"}" value="${esc(S.name)}" autocomplete="off">
+${S.mode==="class"?`
+    <label for="nm"><b>번호와 이름 두 글자를 적어 주세요</b> <span class="sub">예: 1번 차신혜 → <b>1차신</b></span></label>
+    <input id="nm" type="text" maxlength="6" placeholder="예: 1차신" value="${esc(S.name)}" autocomplete="off" style="max-width:240px;display:block;margin:6px 0 12px">
+    <label for="pn"><b>비밀번호 숫자 4자리를 정해 주세요</b> <span class="sub">내 결과를 다시 볼 때 써요. 꼭 기억해요!</span></label>
+    <input id="pn" type="password" inputmode="numeric" maxlength="4" placeholder="숫자 4자리" value="${esc(S.pin)}" autocomplete="off" style="max-width:240px;display:block;margin:6px 0 0;letter-spacing:.3em">`:`
+    <label for="nm"><b>이름이나 별명을 적어 주세요</b></label>
+    <input id="nm" type="text" maxlength="20" placeholder="예: 하늘이" value="${esc(S.name)}" autocomplete="off">`}
     <p></p>
-    <button class="btn wide" data-act="start">시작하기 🚀</button>`;
+    <button class="btn wide" data-act="start">시작하기 🚀</button>
+    ${S.mode==="class"&&!S.found?`<p class="sub" style="margin-bottom:0">전에 검사한 적이 있으면 <b>같은 반, 같은 이름, 같은 비밀번호</b>를 넣고 시작하기를 누르세요. 이전 검사 결과를 볼 수 있어요.</p>`:""}
+    ${S.found?`<div class="calm" style="margin-top:12px">📂 <b>${esc(S.found.name)}</b> 이름으로 <b>${esc(S.found.date)}</b>에 검사한 결과가 있어요.
+      <div class="row" style="margin-top:10px"><button class="btn" data-act="viewprev">이전 검사 결과 보기</button><button class="btn ghost" data-act="retake">다시 검사하기</button></div>
+      <p class="sub" style="margin-bottom:0">다시 검사하면 이전 결과는 새 결과로 바뀌어요.</p></div>`:""}`;
   return `
   <div class="card center">
     <div class="big-emoji">🧭</div>
@@ -957,6 +966,7 @@ V.classview = () => {
   const cls=S.vcls;
   const items = S.cvOnline ? (S.cvList||[]).map(x=>({name:x.name,t:x.t,me:!S.from&&S.rec&&S.rec.name===x.name&&S.rec.cls===cls}))
     : classRecords().filter(r=>(r.cls||"")===cls).map(r=>({name:r.name,t:r.chosen||calc(r).top,me:!S.from&&S.rec&&S.rec.id===r.id}));
+  items.sort((a,b)=>byNo(a.name,b.name));
   const group={}; items.forEach(x=>(group[x.t]=group[x.t]||[]).push(x));
   const back = S.cvFrom==="teacher"?["teacher","◀ 선생님 모드로"]:S.cvFrom==="result"?["result","◀ 결과로"]:["home","◀ 처음으로"];
   const o=S.openType;
@@ -982,7 +992,7 @@ V.classview = () => {
 };
 
 /* ---------- 선생님 모드 ---------- */
-const tItems = () => teacherList().map(r=>({r,c:calc(r)})).map(x=>({...x,t:x.r.chosen||x.c.top}));
+const tItems = () => teacherList().map(r=>({r,c:calc(r)})).map(x=>({...x,t:x.r.chosen||x.c.top})).sort((a,b)=>byNo(a.r.name,b.r.name));
 function tSummary(list, showCls){
   const group={}; list.forEach(x=>(group[x.t]=group[x.t]||[]).push(x));
   const cc={gut:0,heart:0,head:0}; list.forEach(x=>cc[TYPES[x.t].center]++);
@@ -1005,7 +1015,7 @@ function tTable(list, title, buttons){
         <td>${x.c.feelType||"-"}번<br><span class="sub">${REACT[x.r.feel.r||0].name||"모름"}</span></td>
         <td>${x.r.deep.join(", ")}</td>
         <td class="sub">${[1,2,3,4,5,6,7,8,9].map(t=>x.c.q[t]).join(" · ")}</td>
-        <td class="noprint"><button class="linkbtn" data-act="tdel" data-v="${esc(x.r.id)}">삭제</button></td></tr>`).join("")}
+        <td class="noprint">${ONLINE?`<button class="linkbtn" data-act="tpinreset" data-v="${esc(x.r.id)}">비밀번호 초기화</button>`:""}<button class="linkbtn" data-act="tdel" data-v="${esc(x.r.id)}">삭제</button></td></tr>`).join("")}
     </table></div>
     <p></p><div class="row noprint">
       <button class="btn ghost small" data-act="csv">엑셀(CSV)로 저장</button>
@@ -1207,6 +1217,8 @@ function teacherOnline(){
     <h2 style="margin-top:0">${esc(cur.name)} · ${list.length}명</h2>
     <div class="calm noprint">📣 학생들에게 이렇게 알려 주세요<br>
       첫 화면에서 <b>'반에서 검사하기'</b>를 누르고 반 코드 <b style="font-size:1.3rem;letter-spacing:.15em">${cur.code}</b> 를 적어요.
+      <br>이름은 <b>번호와 이름 두 글자</b>(예: 1번 차신혜 → 1차신), 비밀번호는 <b>숫자 4자리</b>를 스스로 정해요. 같은 이름과 비밀번호로 다시 들어오면 자기 결과를 볼 수 있어요.
+      <br><span class="sub">비밀번호를 잊은 학생은 아래 표에서 '비밀번호 초기화'를 눌러 주세요. 그다음에 학생이 넣는 비밀번호로 새로 정해져요.</span>
       ${link?`<br>또는 아래 <b>QR코드</b>나 주소로 들어오면 반 코드가 자동으로 들어가요.
       <div class="row" style="margin-top:10px;align-items:flex-start">
         <div style="background:#fff;padding:8px;border-radius:12px;line-height:0">${qrSVG(link+cur.code,170)}</div>
@@ -1286,25 +1298,39 @@ const A = {
   home(){ S.from=null; go("home"); },
   async start(){
     if(!S.mode){ toast("어떻게 검사할지 먼저 골라 주세요"); return; }
-    const nm=document.getElementById("nm").value.trim();
-    const keep={name:nm,mode:S.mode,cls:"",aud:S.mode==="private"?S.aud:"kid"};
+    const isC=S.mode==="class";
+    const nm=document.getElementById("nm").value.trim().replace(isC?/\s+/g:/^$/,"");
+    const pin=isC?(document.getElementById("pn").value||"").trim():"";
+    const keep={name:nm,mode:S.mode,cls:"",aud:S.mode==="private"?S.aud:"kid",pin};
     if(S.mode==="class" && ONLINE){
       const code=(document.getElementById("cc").value||"").trim().toUpperCase();
       if(!isCode(code)){ toast("반 코드 6자리를 적어 주세요"); document.getElementById("cc").focus(); return; }
-      if(!nm){ toast("이름을 먼저 적어 주세요"); document.getElementById("nm").focus(); return; }
+      if(!classInputOk(nm,pin)) return;
       toast("반을 확인하고 있어요…");
       try{
         const info=await api("classInfo",{code});
         const l=clsLabels(); l[info.code]={n:info.name,t:info.teacher}; store.set("ennea_clslabels",l);
-        keep.cls=info.code; toast((info.teacher?info.teacher+" 선생님의 ":"")+info.name+"에서 검사해요");
+        keep.cls=info.code;
+        if(!S.retake){
+          const prev=cleanRecord((await api("myResult",{code:info.code,name:nm,pin})).record);
+          if(prev){ S.found=prev; S.name=nm; S.ccode=info.code; render(); toast("이전에 검사한 결과가 있어요"); return; }
+        }
+        toast((info.teacher?info.teacher+" 선생님의 ":"")+info.name+"에서 검사해요");
       }catch(e){ toast(e.message); return; }
     } else {
       if(!nm){ toast("이름을 먼저 적어 주세요"); document.getElementById("nm").focus(); return; }
-      if(S.mode==="class"){ keep.cls=/^\d+-\d+$/.test(S.cls)?S.cls:"5-1"; store.set("ennea_lastcls",keep.cls); }
+      if(S.mode==="class"){
+        if(!classInputOk(nm,pin)) return;
+        keep.cls=/^\d+-\d+$/.test(S.cls)?S.cls:"5-1"; store.set("ennea_lastcls",keep.cls);
+        const prev=!S.retake && classRecords().filter(x=>(x.cls||"")===keep.cls && x.name===nm && !x.imported).pop();
+        if(prev && prev.pin && prev.pin!==pin){ toast("이 이름으로 한 검사가 있는데 비밀번호가 달라요"); return; }
+        if(prev){ S.found=prev; S.name=nm; render(); toast("이전에 검사한 결과가 있어요"); return; }
+      }
     }
+    if(S.retake && S.found) keep.reuseId=S.found.id;
     Object.assign(S,fresh(),keep); go("feel");
   },
-  mode(v){ S.mode=v; if(v==="class"){ S.aud="kid"; if(!S.cls) S.cls=store.get("ennea_lastcls","5-1"); } render(); const el=document.getElementById(v==="class"&&ONLINE&&!S.ccode?"cc":"nm"); if(el) el.focus(); },
+  mode(v){ S.mode=v; S.found=null; S.retake=false; if(v==="class"){ S.aud="kid"; if(!S.cls) S.cls=store.get("ennea_lastcls","5-1"); } render(); const el=document.getElementById(v==="class"&&ONLINE&&!S.ccode?"cc":"nm"); if(el) el.focus(); },
   delmine(v){ if(confirm("이 결과를 이 기기에서 지울까요? 되돌릴 수 없어요.")){ store.set("ennea_records",records().filter(x=>x.id!==v)); if(S.rec&&S.rec.id===v) S.rec=null; go("home"); toast("결과를 지웠어요"); } },
   classview(v){
     if(S.view!=="classview") S.cvFrom = S.view==="teacher"?"teacher":S.view==="result"?"result":"home";
@@ -1323,6 +1349,12 @@ const A = {
   },
   cvopen(v){ S.openType=+v; render(); const d=document.getElementById("detail"); if(d) d.scrollIntoView({behavior:"smooth"}); },
   tcls(v){ S.tcls=v; render(); },
+  viewprev(){
+    const r=S.found; if(!r) return;
+    if(isOnlineCls(r)){ r.synced=true; r.pin=S.pin||""; }
+    saveRecord(r); sset("ennea_last",r.id); S.found=null; S.rec=r; S.show=0; S.from=null; go("result");
+  },
+  retake(){ if(!S.found) return; S.retake=true; return A.start(); },
   resume(){ const p=store.get("ennea_progress",null); if(!p) return; Object.assign(S,fresh(),p); render(); window.scrollTo(0,0); },
   goto(v){ go(v); },
   feel(v){ S.feel.k=v; saveProgress(); render(); },
@@ -1391,6 +1423,12 @@ const A = {
   }
 };
 /* ---------- 온라인: 학생 결과 보내기 / 선생님 요청 ---------- */
+function classInputOk(nm,pin){
+  if(!/^\d{1,2}[가-힣a-zA-Z]{2}$/.test(nm)){ toast("번호와 이름 두 글자로 적어 주세요. 예: 1차신"); document.getElementById("nm").focus(); return false; }
+  if(!/^\d{4}$/.test(pin)){ toast("비밀번호는 숫자 4자리로 정해 주세요"); document.getElementById("pn").focus(); return false; }
+  return true;
+}
+const byNo = (a,b) => (parseInt(a,10)||999)-(parseInt(b,10)||999) || String(a).localeCompare(String(b),"ko");
 const isOnlineCls = r => ONLINE && isClass(r) && isCode(r.cls) && !r.imported;
 function syncHTML(r){
   if(S.from || !isOnlineCls(r)) return "";
@@ -1401,8 +1439,8 @@ function syncHTML(r){
 async function pushResult(rec){
   if(!isOnlineCls(rec)) return;
   try{
-    const {synced,syncErr,...body} = rec;
-    await api("submit",{code:rec.cls,type:rec.chosen||calc(rec).top,record:body});
+    const {synced,syncErr,pin,...body} = rec;
+    await api("submit",{code:rec.cls,type:rec.chosen||calc(rec).top,record:body,pin:pin||""});
     rec.synced=true; delete rec.syncErr;
   }catch(e){ rec.synced=false; rec.syncErr=e.message; }
   saveRecord(rec);
@@ -1475,6 +1513,11 @@ Object.assign(A,{
     if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(done,()=>prompt("아래 주소를 복사하세요",url));
     else prompt("아래 주소를 복사하세요",url);
   },
+  tpinreset(v){
+    const x=S.tlist.find(r=>r.id===v); if(!x) return;
+    if(!confirm(`${x.name} 학생의 비밀번호를 초기화할까요? 다음에 학생이 넣는 비밀번호로 새로 정해져요.`)) return;
+    return tcall("resetPin",{code:S.tcls,id:v},()=>{ setTimeout(()=>toast(`${x.name} 학생의 비밀번호를 초기화했어요`),50); });
+  },
   tshare(){ const c=S.tclasses.find(x=>x.code===S.tcls); if(c) return tcall("setShare",{code:c.code,share:!c.share},j=>{ S.tclasses=j.classes; }); },
   tdelclass(){
     const c=S.tclasses.find(x=>x.code===S.tcls); if(!c) return;
@@ -1483,8 +1526,9 @@ Object.assign(A,{
   }
 });
 function finish(){
-  const rec={id:"r"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),name:S.name,date:new Date().toISOString().slice(0,10),
+  const rec={id:S.reuseId||("r"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),name:S.name,date:new Date().toISOString().slice(0,10),
     ans:S.ans.slice(),feel:{...S.feel},deep:S.deep.slice(),chosen:0,pledge:"",mode:S.mode||"private",cls:S.mode==="class"?S.cls:"",aud:S.mode==="private"?S.aud:"kid"};
+  if(rec.mode==="class" && S.pin) rec.pin=S.pin;
   saveRecord(rec); sset("ennea_last",rec.mode==="class"?rec.id:null); store.del("ennea_progress"); S.rec=rec; S.show=0; S.from=null; go("result"); pushResult(rec);
 }
 function download(blob,name){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); }
@@ -1495,12 +1539,14 @@ document.addEventListener("click",e=>{
 });
 document.addEventListener("keydown",e=>{
   if(e.key!=="Enter") return;
-  if(e.target.id==="nm"||e.target.id==="cc") A.start(); else if(e.target.id==="pw") A.pw();
+  if(e.target.id==="nm"||e.target.id==="cc"||e.target.id==="pn") A.start(); else if(e.target.id==="pw") A.pw();
   else if(e.target.id==="tpw") (S.tform==="signup"?A.tsignup:A.tlogin)(); else if(e.target.id==="tcn") A.tnew(); else if(e.target.id==="tnp") A.tpwsave();
 });
 document.addEventListener("input",e=>{
   if(e.target.id==="nm") S.name=e.target.value;
   if(e.target.id==="cc") S.ccode=e.target.value.toUpperCase();
+  if(e.target.id==="pn") S.pin=e.target.value;
+  if((e.target.id==="nm"||e.target.id==="cc"||e.target.id==="pn") && S.found){ S.found=null; S.retake=false; }
   if(e.target.id==="pledge" && S.rec && !S.from){ S.rec.pledge=e.target.value; saveRecord(S.rec); pushSoon(S.rec); }
 });
 
