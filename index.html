@@ -1476,6 +1476,42 @@ function mindUniverse(st){
         <li><b>이 학생이 친해지고 싶어 하는 친구:</b> ${pick(n=>st.get(sel,n)&&st.get(sel,n).w)}</li>
         <li><b>이 학생과 친해지고 싶어 하는 친구:</b> ${pick(n=>st.get(n,sel)&&st.get(n,sel).w)}</li></ul></div>`; })():""}`;
 }
+// 유형과 거리: 학생들의 에니어그램 유형과 마음거리를 함께 본다 (선생님 화면에만 있음)
+function mindTypes(st){
+  const tOf={}; (S.tlist||[]).forEach(r=>{ tOf[r.name]=r.chosen||calc(r).top; });
+  const have=st.names.filter(n=>tOf[n]);
+  if(!have.length) return `<h2>유형과 거리</h2><div class="note">학생들의 유형을 불러오지 못했어요. 선생님 모드에서 반을 다시 연 뒤 들어와 주세요.</div>`;
+  const types=[1,2,3,4,5,6,7,8,9].filter(t=>have.some(n=>tOf[n]===t));
+  const cell={}; types.forEach(a=>{ cell[a]={}; types.forEach(b=>{ cell[a][b]={n:0,f:0,all:0}; }); });
+  st.names.forEach(a=>st.names.forEach(b=>{ if(a===b||!tOf[a]||!tOf[b]) return; const v=st.get(a,b); if(!v) return;
+    const c=cell[tOf[a]][tOf[b]]; c.all++; if(v.d===1) c.n++; if(v.d===3) c.f++; }));
+  const lab=n=>`${esc(n)}<span class="sub">(${tOf[n]||"?"}번)</span>`;
+  const sum=types.map(t=>{ const mem=st.rows.filter(r=>tOf[r.name]===t), k=mem.length||1;
+    return {t,mem,near:mem.reduce((x,r)=>x+r.near,0),far:mem.reduce((x,r)=>x+r.far,0),k}; });
+  const pairBox=(title,hint,pairs,cls,sep)=>`<div class="box ${cls}"><b>${title}</b> <span class="sub">${pairs.length} · ${hint}</span>
+      ${pairs.length?`<div style="margin-top:6px;line-height:2">${pairs.map(p=>lab(p[0])+" "+sep+" "+lab(p[1])).join(" &nbsp;|&nbsp; ")}</div>`:`<div class="sub" style="margin-top:4px">없어요</div>`}</div>`;
+  return `<h2>유형과 거리</h2>
+    <div class="note"><b>읽기 전에</b><br>이 표는 선생님이 모둠과 자리를 정할 때 참고하는 자료예요. 한 반의 인원으로는 우연히 생긴 결과일 수 있고, 어색함은 유형보다 그동안 있었던 일에서 올 때가 많아요. '몇 번과 몇 번은 안 맞는다'로 단정하지 말고, 살펴볼 실마리로만 봐 주세요. 학생들에게는 이 화면이 보이지 않아요.</div>
+    <h3>유형별 학생과 받은 수</h3>
+    <div style="overflow-x:auto"><table>
+      <tr><th>유형</th><th>학생</th><th>받은 가까움</th><th>받은 어색함</th><th>한 명당 평균</th></tr>
+      ${sum.map(x=>`<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${TYPES_K[x.t].color};margin-right:6px"></span><b>${x.t}번</b> <span class="sub">${TYPES_K[x.t].nick}</span></td>
+        <td>${x.mem.map(r=>esc(r.name)).join(", ")} <span class="sub">(${x.mem.length}명)</span></td><td>${x.near}</td><td style="${x.far?"color:#a8463c;font-weight:700":""}">${x.far}</td>
+        <td class="sub">가까움 ${(x.near/x.k).toFixed(1)} · 어색함 ${(x.far/x.k).toFixed(1)}</td></tr>`).join("")}
+    </table></div>
+    <h3>유형끼리 오간 마음</h3>
+    <p class="sub">가로줄이 고른 학생의 유형, 세로줄이 고름을 받은 학생의 유형이에요. 칸의 앞 숫자는 '가까운 거리', 뒤 숫자는 '아직 어색한 거리'로 고른 횟수이고, 괄호는 고를 수 있었던 횟수예요.</p>
+    <div style="overflow-x:auto"><table style="font-size:.85rem;text-align:center">
+      <tr><th style="white-space:normal">고른 유형 ↓ / 받은 유형 →</th>${types.map(t=>`<th style="text-align:center">${t}번</th>`).join("")}</tr>
+      ${types.map(a=>`<tr><th>${a}번 <span class="sub" style="font-weight:400">${TYPES_K[a].nick}</span></th>${types.map(b=>{ const c=cell[a][b]; if(!c.all) return `<td style="text-align:center;color:#b3a99c">–</td>`;
+        return `<td style="text-align:center;${c.n>c.f?"background:#e4efe8":c.f>c.n?"background:#f8e1d6":""}"><b>${c.n}</b> / <b style="${c.f?"color:#a8463c":""}">${c.f}</b> <span class="sub">(${c.all})</span></td>`; }).join("")}</tr>`).join("")}
+    </table></div>
+    <h3>유형과 함께 보는 관계</h3>
+    ${pairBox("서로 가까운 사이","괄호 안은 그 학생의 유형이에요",st.mutual,"good","↔")}
+    ${pairBox("서로 어색한 사이","유형 설명의 '바라는 것'과 '지쳤을 때의 모습'을 함께 보면 도움이 돼요",st.mutualFar,"heart","↔")}
+    ${pairBox("한쪽이 어색하다고 고른 사이","화살표가 고른 방향이에요",st.oneFar,"heart","→")}
+    <p class="sub">학생의 유형은 학생이 스스로 고른 유형(아직 고르지 않았으면 추천 1순위)이에요. '9가지 유형 모두 보기'에서 유형별 건강할 때와 지쳤을 때의 모습을 볼 수 있어요.</p>`;
+}
 // 회차별 누적 비교
 function mindLine(series, labels, H){
   const W=640, P=44, h=H||220, all=series.flatMap(s=>s.v), mx=Math.max(1,...all), mn=Math.min(0,...all), n=labels.length;
@@ -1525,12 +1561,13 @@ function teacherMind(mv){
       <div style="flex:1;min-width:200px"><b>지금 받는 회차: ${mv.round}회차</b><br><span class="sub">학생이 내는 내용은 지금 회차에 저장돼요. 새 회차를 시작하면 이전 회차는 그대로 보관되고, 학생들은 처음부터 다시 골라요.</span></div>
       <button class="btn ghost small noprint" data-act="mnew">새 회차 시작</button></div>
     <div class="row noprint" style="margin-top:14px"><span class="sub">볼 회차</span>${Array.from({length:mv.round},(_,i)=>i+1).map(r=>`<button class="chip ${r===round?"sel":""}" style="${r===round?"background:var(--main)":""}" data-act="mround" data-v="${r}">${r}회차</button>`).join("")}</div>
-    <div class="steps noprint" style="margin:14px 0 6px">${tab("all","전체 보기")}${tab("uni","유니버스 보기")}${tab("matrix","전체 표")}${tab("trend","누적 비교")}</div>`;
+    <div class="steps noprint" style="margin:14px 0 6px">${tab("all","전체 보기")}${tab("uni","유니버스 보기")}${tab("matrix","전체 표")}${tab("types","유형과 거리")}${tab("trend","누적 비교")}</div>`;
   if(sub==="trend") return s+mindTrend(mv)+`<p></p><div class="row noprint"><button class="btn ghost small" data-act="cvtab" data-v="mind">새로 고침</button><button class="btn ghost small" data-act="print">인쇄하기</button></div>`;
   s+=`<h2>${round}회차 응답 현황</h2>
     <p>명단 ${st.names.length}명 가운데 <b>${st.count}명</b>이 냈어요.${st.todo.length?`<br><span class="sub">아직 내지 않은 학생: ${st.todo.map(esc).join(", ")}</span>`:""}</p>`;
   if(!st.count) return s+`<p class="sub">이 회차에는 아직 낸 학생이 없어요.</p><div class="row noprint"><button class="btn ghost small" data-act="cvtab" data-v="mind">새로 고침</button></div>`;
   if(sub==="uni") s+=`<h2>유니버스 보기</h2>`+mindUniverse(st);
+  else if(sub==="types") s+=mindTypes(st);
   else if(sub==="matrix") s+=`<h2>전체 표</h2>
     <p class="sub">가로줄이 고른 학생, 세로줄이 고름을 받은 학생이에요. 1 가까운 거리, 2 보통 거리, 3 아직 어색한 거리, ★ 친해지고 싶은 친구.</p>
     <div style="overflow-x:auto"><table style="font-size:.8rem;text-align:center">
@@ -2224,6 +2261,8 @@ function savePNG(r){
     {bg:"#ffffff",title:"",items:[T.desc]},
     {bg:"#f1f5f0",title:"나의 강점",items:T.good.map(x=>"• "+x)},
     {bg:"#faf3e6",title:"이렇게 하면 더 멋져져요",items:T.grow.map(x=>"• "+x)},
+    {bg:"#f1f5f0",title:ka("마음이 건강할 때","건강할 때의 모습"),items:((AUD==="adult"?HEALTH_A:HEALTH_K)[t]||{h:[]}).h.map(x=>"• "+x)},
+    {bg:"#f8eeea",title:ka("마음이 지치고 힘들 때","건강하지 않을 때의 모습"),items:((AUD==="adult"?HEALTH_A:HEALTH_K)[t]||{u:[]}).u.map(x=>"• "+x)},
     {bg:"#f8eeea",title:"내 마음속 이야기",items:["• 바라는 것: "+T.want,"• 걱정되는 것: "+T.fear]},
     {bg:"#f4f0e8",title:"상황에 따라 달라지는 나",items:[
       `• 많이 힘들고 지칠 때: ${STRESS[t]}번 유형의 아쉬운 모습처럼 ${TYPES[STRESS[t]].low}`,
