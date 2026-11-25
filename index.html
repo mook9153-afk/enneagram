@@ -9,7 +9,7 @@
 :root{
   --paper:#f5f0e8; --surface:#fffdf9; --ink:#2b2724; --sub:#756b62; --line:#e4dccf;
   --main:#2f5d50; --main-d:#234a3f; --soft:#edf2ed; --accent:#b9684a; --warn:#b9684a;
-  --serif:"Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang","바탕",serif;
+  --serif:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;
   --sans:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;
 }
 *{box-sizing:border-box}
@@ -17,7 +17,7 @@ html,body{margin:0}
 body{font-family:var(--sans);color:var(--ink);background:var(--paper);min-height:100vh;
   line-height:1.7;word-break:keep-all;-webkit-text-size-adjust:100%;font-size:16px}
 #app{max-width:720px;margin:0 auto;padding:28px 18px 72px}
-h1{font-family:var(--serif);font-size:1.75rem;font-weight:700;margin:.2em 0;line-height:1.35;letter-spacing:-.01em}
+h1{font-family:var(--sans);font-size:1.75rem;font-weight:800;margin:.2em 0;line-height:1.35;letter-spacing:-.01em}
 h2{font-size:1.12rem;font-weight:700;margin:1.6em 0 .6em;padding-left:11px;border-left:3px solid var(--accent);line-height:1.35}
 h3{font-size:.98rem;font-weight:700;margin:1.3em 0 .4em;color:var(--main-d)}
 p{margin:.55em 0}
@@ -60,7 +60,8 @@ label b{font-size:.95rem}
 .opt.sel{border-color:var(--main);background:var(--soft);box-shadow:inset 0 0 0 1px var(--main)}
 .opt .n{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid #cfc6b8;background:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem;color:var(--sub)}
 .opt.sel .n{background:var(--main);border-color:var(--main);color:#fff}
-.qstem{font-family:var(--serif);font-size:1.32rem;font-weight:700;margin:4px 0 16px;line-height:1.5}
+.qstem{font-family:var(--sans);font-size:1.4rem;font-weight:800;color:#1c1917;line-height:1.5;margin:8px 0 18px;padding:16px 18px;background:#e7f0ea;border-left:6px solid var(--main);border-radius:8px}
+.qstem.q2{font-size:1.2rem;margin-top:26px}
 .tone{font-size:.84rem;font-weight:700;color:#7a5a3a;border-bottom:1px solid #e3d5bf;display:block;padding:14px 0 6px;margin:6px 0 2px}
 .note{background:#faf4e6;border:1px solid #eadfc6;border-left:3px solid #c9a55a;border-radius:10px;padding:14px 16px;margin:14px 0;font-size:.95rem}
 .calm{background:#eef3ee;border:1px solid #d5e0d6;border-left:3px solid #6f9a80;border-radius:10px;padding:14px 16px;margin:14px 0;font-size:.95rem}
@@ -676,7 +677,7 @@ function toast(msg){ const t=document.createElement("div"); t.className="toast";
 
 function stepsBar(n){
   const names=["① 느낌 찾기","② 검사지","③ 마음 질문","④ 결과"];
-  return `<div class="steps noprint">${names.map((s,i)=>`<span class="${i+1===n?"on":i+1<n?"done":""}">${s}</span>`).join("")}</div>`;
+  return `${n<4?`<div class="row between noprint" style="margin-bottom:10px"><button class="btn ghost small" data-act="pause">◀ 처음으로</button><span class="sub">여기까지 한 내용은 자동으로 저장돼요</span></div>`:""}<div class="steps noprint">${names.map((s,i)=>`<span class="${i+1===n?"on":i+1<n?"done":""}">${s}</span>`).join("")}</div>`;
 }
 
 const V = {};
@@ -782,11 +783,11 @@ V.feel = () => `
     <p>지금부터 <b>듣기 싫은 말 9가지</b>를 읽어 볼 거예요.<br>누군가 진짜로 나에게 이런 말을 한다고 상상하면서 읽어 보세요.</p>
     <div class="calm">이 말들은 <b>진짜가 아니에요.</b> 내 마음을 알아보기 위한 연습일 뿐이에요.<br>
     먼저 숨을 깊게 들이마시고, 길게 내쉬어요. 머리로 생각하기보다 <b>몸과 마음의 느낌</b>에 귀 기울여요.</div>
-    <p><b>읽었을 때 마음이 가장 크게 움직인 말(가장 듣기 싫은 말) 하나를 골라 주세요.</b></p>
+    <div class="qstem">읽었을 때 마음이 가장 크게 움직인 말(가장 듣기 싫은 말) 하나를 골라 주세요.</div>
     ${[0,1,2].map(g=>`<div class="tone">${FEEL_TONE[g]}</div>`+FEEL.filter(f=>f.g===g).map(f=>
-      `<button class="opt ${S.feel.k===f.k?"sel":""}" data-act="feel" data-v="${f.k}"><span class="n">${f.k}</span><span>“${f.text}”</span></button>`).join("")).join("")}
+      `<button class="opt ${S.feel.k===f.k?"sel":""}" data-act="feel" data-v="${f.k}"><span class="n">${f.k}</span><span>${f.text}</span></button>`).join("")).join("")}
     <div class="row between noprint" style="margin-top:14px">
-      <button class="btn ghost" data-act="home">처음으로</button>
+      <button class="btn ghost" data-act="pause">처음으로</button>
       <button class="btn" data-act="feelnext" ${S.feel.k?"":"disabled"}>다음 ▶</button>
     </div>
   </div>`;
@@ -797,10 +798,10 @@ V.feel2 = () => {
   ${stepsBar(1)}
   <div class="card">
     <h1>그 말을 들었을 때…</h1>
-    <div class="box">“${f.text}”</div>
-    <h3>얼마나 싫었나요?</h3>
+    <div class="box" style="font-weight:700;font-size:1.05rem">${f.text}</div>
+    <div class="qstem q2">얼마나 싫었나요?</div>
     ${[1,2,3].map(i=>`<button class="opt ${S.feel.s===i?"sel":""}" data-act="feels" data-v="${i}"><span class="n">${i}</span><span>${STRENGTH[i]}</span></button>`).join("")}
-    <h3>몸과 마음에 어떤 느낌이 올라왔나요?</h3>
+    <div class="qstem q2">몸과 마음에 어떤 느낌이 올라왔나요?</div>
     ${[1,2,3,0].map(i=>`<button class="opt ${S.feel.r===i?"sel":""}" data-act="feelr" data-v="${i}"><span class="n">${REACT[i].e}</span><span>${REACT[i].t}</span></button>`).join("")}
     <div class="row between noprint" style="margin-top:14px">
       <button class="btn ghost" data-act="goto" data-v="feel">◀ 이전</button>
@@ -1441,6 +1442,7 @@ const A = {
     saveRecord(r); sset("ennea_last",r.id); S.found=null; S.rec=r; S.show=0; S.from=null; go("result");
   },
   retake(){ if(!S.found) return; S.retake=true; return A.start(); },
+  pause(){ saveProgress(); go("home"); toast("저장했어요. 첫 화면의 '하던 검사 이어서 하기'로 계속할 수 있어요"); },
   resume(){ const p=store.get("ennea_progress",null); if(!p) return; Object.assign(S,fresh(),p); render(); window.scrollTo(0,0); },
   goto(v){ go(v); },
   feel(v){ S.feel.k=v; saveProgress(); render(); },
