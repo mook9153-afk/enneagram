@@ -92,10 +92,10 @@ ul.clean li{margin:.3em 0}
 .box.grow{background:#faf3e6;border-color:#ecdfc6;border-left:3px solid #c9a55a}
 .box.friend{background:#eff2f4;border-color:#dbe1e6;border-left:3px solid #7d93a6}
 .box.heart{background:#f8eeea;border-color:#ecd9d2;border-left:3px solid #c08873}
-.hbar{display:grid;grid-template-columns:150px 1fr 34px;gap:8px;align-items:center;margin:7px 0;font-size:.9rem}
+.hbar{display:grid;grid-template-columns:186px 1fr 34px;gap:8px;align-items:center;margin:7px 0;font-size:.9rem}
 .hbar .track{height:10px;background:#ebe5da;border-radius:99px;overflow:hidden}
 .hbar .track i{display:block;height:100%;border-radius:99px}
-@media(max-width:560px){.hbar{grid-template-columns:112px 1fr 30px;font-size:.84rem}}
+@media(max-width:560px){.hbar{grid-template-columns:128px 1fr 30px;font-size:.84rem}}
 table{border-collapse:collapse;width:100%;font-size:.9rem}
 th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
 th{color:var(--sub);font-weight:700;font-size:.84rem;white-space:nowrap}
@@ -666,7 +666,7 @@ const URLC = (()=>{ try{ return (new URLSearchParams(location.search).get("c")||
 const S = fresh();
 function fresh(){ return {view:"home",name:"",feel:{k:null,s:null,r:null},ans:Array(60).fill(0),qi:0,deep:[0,0,0,0],di:0,
   deepOrder:DEEP.map(()=>shuffle([1,2,3,4,5,6,7,8,9])),rec:null,show:0,openType:0,friend:0,teacher:false,from:null,mode:ONLINE&&URLC?"class":null,cls:"",tcls:ONLINE?"":"*",vcls:"",cvFrom:null,
-  aud:"kid",ccode:URLC,tok:null,tname:"",tclasses:[],tlist:[],tform:"login",cvOnline:false,cvList:null,cvMsg:"",tadmin:false,tnote:"",tpwform:false,adm:null,atemp:null,found:null,retake:false,reuseId:null,pin:"",ttype:0,ttypeEdit:false,forTeacher:false}; }
+  aud:"kid",ccode:URLC,tok:null,tname:"",tclasses:[],tlist:[],tform:"login",cvOnline:false,cvList:null,cvMsg:"",tadmin:false,tnote:"",tpwform:false,adm:null,atemp:null,found:null,retake:false,reuseId:null,pin:"",ttype:0,ttypeEdit:false,forTeacher:false,tshow:false,cvTeacher:null,cvTab:"friends",gv:null,gvErr:"",gpick:0,gtext:"",gedit:false}; }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const $app = document.getElementById("app");
@@ -745,7 +745,7 @@ ${S.mode==="class"?`
     <h2 style="margin-top:0">이렇게 진행해요</h2>
     <ol class="steps-list">
       <li><div><b>느낌 찾기</b><span>아홉 가지 말을 듣고 내 몸과 마음이 어떻게 반응하는지 느껴 봐요.</span></div></li>
-      <li><div><b>검사지 60문항</b><span>평소의 나와 가장 비슷한 것을 하나씩 골라요. 15분쯤 걸려요.</span></div></li>
+      <li><div><b>검사지 60문항</b><span>평소의 나와 가장 비슷한 것을 하나씩 골라요. 15분 정도 걸립니다.</span></div></li>
       <li><div><b>마음 질문 4개</b><span>내가 왜 그렇게 행동하는지 생각해 봐요.</span></div></li>
       <li><div><b>결과</b><span>추천 순위를 참고해서 나와 가장 비슷한 유형을 스스로 골라요.</span></div></li>
     </ol>
@@ -1054,6 +1054,7 @@ V.friend = () => {
 function backBtn(){ return S.rec?`<button class="btn ghost small noprint" data-act="goto" data-v="result">◀ ${S.from?"결과로":"내 결과로"}</button>`:`<button class="btn ghost small noprint" data-act="home">◀ 처음으로</button>`; }
 
 V.classview = () => {
+  if(S.cvOnline && S.cvTab==="guess") return guessPage();
   const cls=S.vcls;
   const items = S.cvOnline ? (S.cvList||[]).map(x=>({name:x.name,t:x.t,me:!S.from&&S.rec&&S.rec.name===x.name&&S.rec.cls===cls}))
     : classRecords().filter(r=>(r.cls||"")===cls).map(r=>({name:r.name,t:r.chosen||calc(r).top,me:!S.from&&S.rec&&S.rec.id===r.id}));
@@ -1064,6 +1065,8 @@ V.classview = () => {
   return `
   <div class="card">
     <div class="row between"><h1 style="margin:0">${esc(clsName(cls))} 친구들</h1><button class="btn ghost small noprint" data-act="goto" data-v="${back[0]}">${back[1]}</button></div>
+    ${cvTabs()}
+    ${cvTeacherBox()}
     ${S.cvOnline && S.cvMsg ? `<div class="note">${esc(S.cvMsg)}</div>` : `
     <p class="sub">반에서 검사한 친구 ${items.length}명의 유형이에요. 이름을 누르면 그 유형의 설명과 잘 지내는 방법이 나와요.</p>
     <div class="note">유형은 친구를 더 잘 이해하기 위한 거예요. "넌 ○번이라서 그래" 하고 놀리거나 단정 짓지 않기로 약속해요.</div>
@@ -1178,18 +1181,28 @@ const CLASH = {
 8:{큰소리:"선생님도 강하게 맞서면 힘겨루기가 됩니다. 과민하게 반응하지 말고 침착하게 대해 주세요.",명령:"일방적인 명령에는 정면으로 맞섭니다. 이유를 분명히 말하고 타협의 가치를 알려 주세요.",야단못침:"피하거나 물러서면 아이는 더 밀어붙입니다. 침착하지만 분명하게 선을 알려 주세요.",지적:"잘못을 따지면 화로 맞받습니다. 화 말고 말로 표현하는 방법을 먼저 알려 주세요.",감정기복:"선생님이 감정적으로 반응하면 더 크게 부딪칩니다."},
 9:{큰소리:"야단치는 말투와 감정적인 말투는 금물입니다. 아이는 더 움츠러들고 마음을 닫습니다.",재촉:"성급하게 재촉하면 역효과가 납니다. 스스로 정할 때까지 기다려 주세요.",결정미룸:"선생님도 결정을 미루면 아이는 계속 묻혀 있게 됩니다. 아이가 스스로 고르도록 기회를 만들어 주세요.",다챙김:"대신 정해 주고 챙겨 주면 아이는 자기 바람을 더 말하지 않게 됩니다.",야단못침:"서로 맞춰 주기만 하면 아이의 속마음이 드러나지 않습니다. '너는 무엇이 좋니?'를 자주 물어 주세요.",지적:"잘못을 자주 짚으면 자기 생각은 중요하지 않다고 여기게 됩니다."}
 };
+const myTShow = () => ONLINE ? !!S.tshow : !!store.get("ennea_tshow",false);
+function cvTeacherBox(){
+  const x=S.cvTeacher; if(!x || !TYPES[x.type]) return "";
+  const T=TYPES[x.type];
+  return `<div class="box" style="border-left:6px solid ${T.color}"><b>우리 선생님</b>
+    <div class="row" style="margin-top:6px"><button class="chip" data-act="cvopen" data-v="${x.type}">${esc(x.name?x.name+" 선생님":"선생님")} · ${T.e} ${x.type}번 ${T.nick}</button></div></div>`;
+}
 const myTType = () => ONLINE ? (S.ttype||0) : (+store.get("ennea_ttype",0)||0);
 function teacherTypeCard(){
   const t=myTType();
   return `<div class="card noprint">
     <h2 style="margin-top:0">선생님의 유형과 아이들</h2>
     ${t?`<p>선생님의 유형: <b>${t}번 · ${TYPES_A[t].nick}</b></p>
-      <div class="row"><button class="btn" data-act="guide">유형별 아이 대하는 방법 보기</button><button class="btn ghost small" data-act="ttypeedit">유형 바꾸기</button></div>`
+      <div class="row"><button class="btn" data-act="guide">유형별 아이 대하는 방법 보기</button><button class="btn ghost small" data-act="ttypeedit">유형 바꾸기</button></div>
+      <div class="row" style="margin-top:14px"><span>아이들에게 내 유형 공개: <b>${myTShow()?"공개함":"공개 안 함"}</b></span>
+        <button class="btn ghost small" data-act="tshowtoggle">${myTShow()?"공개하지 않기":"공개하기"}</button></div>
+      <p class="sub" style="margin-bottom:0">${myTShow()?"학생들이 '우리 반 친구들' 화면에서 선생님의 유형을 볼 수 있어요.":"지금은 학생들에게 선생님의 유형이 보이지 않아요. 공개하면 '우리 반 친구들' 화면 맨 위에 선생님의 유형이 함께 나와요."}</p>`
      :`<p class="sub">선생님의 유형을 알려 주시면, 선생님과 다른 유형의 아이를 대할 때 도움이 되는 방법을 보여 드려요.</p>`}
     ${!t||S.ttypeEdit?`<p style="margin:14px 0 8px"><b>내 유형을 알고 있다면 골라 주세요</b></p>
       <div class="row">${[1,2,3,4,5,6,7,8,9].map(n=>`<button class="chip ${t===n?"sel":""}" style="${t===n?"background:var(--main)":""}" data-act="tsettype" data-v="${n}">${n}번 ${TYPES_A[n].nick}</button>`).join("")}</div>
       <p style="margin:16px 0 8px"><b>아직 모른다면</b></p>
-      <button class="btn ghost" data-act="ttest">어른용 검사로 알아보기 (15분쯤)</button>
+      <button class="btn ghost" data-act="ttest">어른용 검사로 알아보기</button>
       <p class="sub" style="margin-bottom:0">검사가 끝나면 결과 화면에서 '선생님 유형으로 저장'을 누르면 여기에 기록돼요.</p>`:""}
   </div>`;
 }
@@ -1232,6 +1245,84 @@ async function applyPendType(){
   sset("ennea_pendtype",null); await A.tsettype(t);
 }
 
+
+/* ---------- 우리 반 탭: 선생님은 어떤 유형일까? ---------- */
+function cvTabs(){
+  if(!S.cvOnline) return "";
+  const tab=(v,label)=>`<span class="${(S.cvTab==="guess")===(v==="guess")?"on":""}" data-act="cvtab" data-v="${v}" style="cursor:pointer;font-size:.95rem">${label}</span>`;
+  return `<div class="steps noprint" style="margin:10px 0 16px">${tab("friends","친구들 유형")}${tab("guess","선생님은 어떤 유형일까?")}</div>`;
+}
+const cvIsTeacher = () => !!(S.tok && S.tcls===S.vcls);
+const cvMe = () => !cvIsTeacher() && S.rec && !S.from && isClass(S.rec) && S.rec.cls===S.vcls ? S.rec : null;
+function loadGuess(){
+  S.gv=null; S.gvErr="";
+  const me=cvMe();
+  const p = cvIsTeacher() ? api("guessList",{token:S.tok,code:S.vcls})
+                          : api("guessView",{code:S.vcls,name:me?me.name:"",pin:me?(me.pin||""):""});
+  return p.then(j=>{ S.gv=j; if(j.teacher!==undefined) S.cvTeacher=j.teacher||S.cvTeacher; },e=>{ S.gvErr=e.message; })
+          .then(()=>{ if(S.view==="classview") render(); });
+}
+function guessChart(counts,total){
+  const max=Math.max(1,...[1,2,3,4,5,6,7,8,9].map(t=>counts[t]||0));
+  return `<p class="sub">모두 ${total}명이 생각을 냈어요.</p>`+[1,2,3,4,5,6,7,8,9].map(t=>hbar(`${t}번 ${TYPES_K[t].nick}`,counts[t]||0,max,TYPES_K[t].color)).join("");
+}
+function guessReasons(list, withName){
+  const by={}; list.forEach(x=>(by[x.type]=by[x.type]||[]).push(x));
+  return [1,2,3,4,5,6,7,8,9].filter(t=>by[t]).map(t=>`<div class="box" style="border-left:6px solid ${TYPES_K[t].color}"><b>${t}번 ${TYPES_K[t].nick}</b> <span class="sub">— 이렇게 생각한 까닭</span>
+    <ul class="clean">${by[t].map(x=>`<li>${withName?`<b>${esc(x.name)}</b> — `:""}${esc(x.why)}</li>`).join("")}</ul></div>`).join("");
+}
+function studentGuess(g, me){
+  const editing = g.open && me && (!g.mine || S.gedit);
+  let s=`<h2>선생님은 어떤 유형일까?</h2>
+    <p>내 검사를 하고 친구들의 유형도 살펴봤다면, 이번에는 우리 선생님을 떠올려 보세요.<br>선생님은 아홉 가지 가운데 어떤 유형에 가까울까요?</p>`;
+  if(!g.open && !g.revealed && !g.mine) return s+`<div class="note">선생님이 아직 이 활동을 열지 않았어요.</div>`;
+  if(g.open && !me) s+=`<div class="note">참여하려면 내 검사 결과를 먼저 열어야 해요. 첫 화면에서 '반에서 검사하기'를 누르고 <b>같은 반 코드, 이름, 비밀번호</b>로 들어온 뒤 '우리 반 친구들 보기'를 눌러 주세요.</div>`;
+  if(g.mine && !editing) s+=`<div class="box good"><b>내가 낸 생각</b><br><span style="font-size:1.1rem;font-weight:700">${g.mine.type}번 ${TYPES_K[g.mine.type].nick}</span><br>${esc(g.mine.why)}
+      ${g.open&&me?`<div style="margin-top:10px"><button class="btn ghost small" data-act="gedit">고치기</button></div>`:""}</div>`;
+  if(editing) s+=`
+    <div class="qstem q2">선생님은 어떤 유형에 가까울까요?</div>
+    <div class="row">${[1,2,3,4,5,6,7,8,9].map(t=>`<button class="chip ${S.gpick===t?"sel":""}" style="${S.gpick===t?`background:${TYPES_K[t].color}`:""}" data-act="gpick" data-v="${t}">${TYPES_K[t].e} ${t}번 ${TYPES_K[t].nick}</button>`).join("")}</div>
+    <p class="sub">유형이 잘 떠오르지 않으면 '친구들 유형' 탭에서 유형 설명을 다시 읽어 보세요.</p>
+    <div class="qstem q2">그렇게 생각한 까닭은 무엇인가요?</div>
+    <textarea id="gwhy" rows="3" maxlength="200" placeholder="예: 선생님이 우리 이야기를 끝까지 들어 주실 때 그렇게 느꼈어요.">${esc(S.gtext||"")}</textarea>
+    <div class="note"><b>쓰기 전에</b><br>선생님의 좋은 점을 찾아서, '선생님이 ○○ 하실 때 그렇게 느꼈어요'처럼 써 주세요.<br>
+      내가 쓴 글은 선생님에게 <b>내 이름과 함께</b> 보여요. ${g.whyShown?"선생님이 결과를 공개하면 친구들에게는 <b>이름 없이</b> 보여요.":"친구들에게는 보이지 않아요."}</div>
+    <div class="row"><button class="btn" data-act="gsend">내 생각 보내기</button>${g.mine?`<button class="btn ghost" data-act="gcancel">그만두기</button>`:""}</div>`;
+  if(g.revealed){
+    s+=`<h2>우리 반 친구들의 생각</h2>${guessChart(g.counts||{},g.total||0)}
+      <div class="calm">겉으로 보이는 모습과 속마음은 다를 수 있어요. 그래서 틀린 답은 없어요. 친구들이 선생님의 어떤 모습을 보았는지 살펴보세요.</div>
+      ${S.cvTeacher?`<div class="box" style="border-left:6px solid ${TYPES_K[S.cvTeacher.type].color}"><b>선생님이 알려 준 유형</b><br><span style="font-size:1.1rem;font-weight:700">${S.cvTeacher.type}번 ${TYPES_K[S.cvTeacher.type].nick}</span></div>`:""}
+      ${g.reasons&&g.reasons.length?`<h2>친구들이 쓴 까닭</h2>${guessReasons(g.reasons,false)}`:""}`;
+  } else if(g.open || g.mine) s+=`<p class="sub">친구들의 생각은 선생님이 공개하면 여기에서 볼 수 있어요.</p>`;
+  return s;
+}
+function teacherGuess(g){
+  const row=(label,on,key,onText,offText,hint)=>`<div class="row between" style="padding:12px 0;border-bottom:1px solid var(--line)">
+      <div style="flex:1;min-width:200px"><b>${label}: ${on?onText:offText}</b><br><span class="sub">${hint}</span></div>
+      <button class="btn ${on?"ghost":""} small noprint" data-act="gset" data-v="${key}">${on?(key==="open"?"닫기":"숨기기"):(key==="open"?"열기":"공개하기")}</button></div>`;
+  const counts={}; g.list.forEach(x=>{ counts[x.type]=(counts[x.type]||0)+1; });
+  return `<h2>선생님은 어떤 유형일까? 활동</h2>
+    <p class="sub">학생들이 선생님의 유형을 짐작해 보고 까닭을 쓰는 활동이에요. 자기 검사를 마친 학생만 참여할 수 있어요.</p>
+    ${row("활동",g.open,"open","열림","닫힘","열려 있을 때만 학생이 생각을 내거나 고칠 수 있어요.")}
+    ${row("유형별 결과를 학생에게",g.revealed,"revealed","공개함","공개 안 함","공개하면 학생 화면에 유형별로 몇 명이 골랐는지 그래프가 나와요.")}
+    ${row("까닭 글을 반 친구들에게",g.whyShown,"whyShown","공개함","공개 안 함","결과를 공개했을 때 함께 보여요. 학생 이름은 빼고 글만 보여요.")}
+    <p class="sub">선생님의 실제 유형을 알려 주려면 선생님 모드의 '아이들에게 내 유형 공개'를 켜 주세요. 켜면 결과를 공개한 화면에 함께 나와요.</p>
+    <h2>아이들의 생각</h2>
+    ${g.list.length?guessChart(counts,g.list.length)+guessReasons(g.list.slice().sort((a,b)=>byNo(a.name,b.name)),true)
+      :`<p class="sub">아직 낸 학생이 없어요.</p>`}
+    <p></p><div class="row noprint"><button class="btn ghost small" data-act="cvtab" data-v="guess">새로 고침</button><button class="btn ghost small" data-act="print">인쇄하기</button></div>`;
+}
+function guessPage(){
+  const cls=S.vcls, g=S.gv;
+  const back = S.cvFrom==="teacher"?["teacher","◀ 선생님 모드로"]:S.cvFrom==="result"?["result","◀ 결과로"]:["home","◀ 처음으로"];
+  const body = S.gvErr ? `<div class="note">${esc(S.gvErr)}</div>` : !g ? `<p class="sub">불러오는 중이에요…</p>` : cvIsTeacher() ? teacherGuess(g) : studentGuess(g,cvMe());
+  return `
+  <div class="card">
+    <div class="row between"><h1 style="margin:0">${esc(clsName(cls))}</h1><button class="btn ghost small noprint" data-act="goto" data-v="${back[0]}">${back[1]}</button></div>
+    ${cvTabs()}
+    ${body}
+  </div>`;
+}
 
 /* ---------- QR 코드 (바이트 모드 · 오류 정정 L · 버전 1~6, 외부 도구 없이 직접 그림) ---------- */
 function qrMatrix(text){
@@ -1443,6 +1534,7 @@ function teacherOnline(){
     </div>
     ${tSummary(list,false)}
     <p></p><div class="row noprint">
+      <button class="btn ghost" data-act="tguess" data-v="${cur.code}">'선생님은 어떤 유형일까?' 활동</button>
       <button class="btn" data-act="classview" data-v="${cur.code}">'${esc(cur.name)} 친구들' 화면 열기</button>
     </div>
   </div>
@@ -1521,7 +1613,7 @@ const A = {
         keep.cls=info.code;
         if(!S.retake){
           const prev=cleanRecord((await api("myResult",{code:info.code,name:nm,pin})).record);
-          if(prev){ S.found=prev; S.name=nm; S.ccode=info.code; render(); toast("이전에 검사한 결과가 있어요"); return; }
+          if(prev){ S.found=prev; S.name=nm; S.ccode=info.code; S.pin=pin; render(); toast("이전에 검사한 결과가 있어요"); return; }
         }
         toast((info.teacher?info.teacher+" 선생님의 ":"")+info.name+"에서 검사해요");
       }catch(e){ toast(e.message); return; }
@@ -1542,13 +1634,14 @@ const A = {
   delmine(v){ if(confirm("이 결과를 이 기기에서 지울까요? 되돌릴 수 없어요.")){ store.set("ennea_records",records().filter(x=>x.id!==v)); if(S.rec&&S.rec.id===v) S.rec=null; go("home"); toast("결과를 지웠어요"); } },
   classview(v){
     if(S.view!=="classview") S.cvFrom = S.view==="teacher"?"teacher":S.view==="result"?"result":"home";
-    S.vcls=v||""; S.openType=0; S.cvOnline=ONLINE&&isCode(S.vcls); S.cvMsg="";
+    S.vcls=v||""; S.openType=0; S.cvOnline=ONLINE&&isCode(S.vcls); S.cvMsg=""; S.cvTab="friends"; S.gv=null; S.gvErr=""; S.gpick=0; S.gtext=""; S.gedit=false;
+    S.cvTeacher = (ONLINE ? (S.tok && S.tcls===S.vcls) : true) && myTShow() && myTType() ? {name:ONLINE?S.tname:"",type:myTType()} : null;
     if(S.cvOnline){
       if(S.tok && S.tcls===S.vcls) S.cvList=S.tlist.map(r=>({name:r.name,t:r.chosen||calc(r).top}));
       else {
         S.cvList=null; S.cvMsg="불러오는 중이에요…";
         api("classmates",{code:S.vcls}).then(
-          j=>{ S.cvList=j.list.map(x=>({name:x.name,t:x.type})); S.cvMsg=j.share?"":"선생님이 아직 '반 친구들끼리 유형 보기'를 열지 않았어요."; },
+          j=>{ S.cvList=j.list.map(x=>({name:x.name,t:x.type})); S.cvMsg=j.share?"":"선생님이 아직 '반 친구들끼리 유형 보기'를 열지 않았어요."; S.cvTeacher=j.teacher||null; },
           e=>{ S.cvMsg=e.message; }
         ).then(()=>{ if(S.view==="classview") render(); });
       }
@@ -1598,7 +1691,7 @@ const A = {
   teacher(){
     if(ONLINE && !S.tok){
       let s=null; try{ s=JSON.parse(sget("ennea_tok")||"null"); }catch(e){}
-      if(s && s.tok){ S.tok=s.tok; S.tname=s.name; S.teacher=true; S.tcls=""; S.tlist=[]; go("teacher"); return tcall("listClasses",{},j=>{ S.tclasses=j.classes; S.tadmin=!!j.admin; S.ttype=+j.ttype||0; }).then(applyPendType); }
+      if(s && s.tok){ S.tok=s.tok; S.tname=s.name; S.teacher=true; S.tcls=""; S.tlist=[]; go("teacher"); return tcall("listClasses",{},j=>{ S.tclasses=j.classes; S.tadmin=!!j.admin; S.ttype=+j.ttype||0; S.tshow=!!j.tshow; }).then(applyPendType); }
     }
     go("teacher");
   },
@@ -1661,9 +1754,9 @@ async function tcall(action, data, onOk){
   toast("잠시만요…");
   try{ onOk(await api(action,{token:S.tok,...data})); }
   catch(e){ toast(e.message); if(/로그인/.test(e.message)){ S.tok=null; sset("ennea_tok",null); } }
-  if(S.view==="teacher"||S.view==="admin"||S.view==="guide") render();
+  if(S.view==="teacher"||S.view==="admin"||S.view==="guide"||S.view==="classview") render();
 }
-function tSession(j){ S.tok=j.token; S.tname=j.name; S.tclasses=j.classes||[]; S.tadmin=!!j.admin; S.ttype=+j.ttype||0; S.tnote=""; S.teacher=true; S.tcls=""; S.tlist=[]; sset("ennea_tok",JSON.stringify({tok:j.token,name:j.name})); }
+function tSession(j){ S.tok=j.token; S.tname=j.name; S.tclasses=j.classes||[]; S.tadmin=!!j.admin; S.ttype=+j.ttype||0; S.tshow=!!j.tshow; S.tnote=""; S.teacher=true; S.tcls=""; S.tlist=[]; sset("ennea_tok",JSON.stringify({tok:j.token,name:j.name})); }
 const adminName = id => { const t=S.adm&&S.adm.teachers.find(x=>x.id===id); return t?t.name:""; };
 Object.assign(A,{
   aud(v){ S.aud=v; render(); },
@@ -1728,6 +1821,10 @@ Object.assign(A,{
     return tcall("resetPin",{code:S.tcls,id:v},()=>{ setTimeout(()=>toast(`${x.name} 학생의 비밀번호를 초기화했어요`),50); });
   },
   ttypeedit(){ S.ttypeEdit=!S.ttypeEdit; render(); },
+  tshowtoggle(){
+    if(ONLINE) return tcall("setTypeShow",{show:!S.tshow},j=>{ S.tshow=!!j.tshow; });
+    store.set("ennea_tshow",!myTShow()); render();
+  },
   tsettype(v){
     const t=+v; if(!(t>=1&&t<=9)) return; S.ttypeEdit=false;
     if(ONLINE) return tcall("setMyType",{type:t},()=>{ S.ttype=t; });
@@ -1748,6 +1845,27 @@ Object.assign(A,{
     return tcall("deleteClass",{code:c.code},j=>{ S.tclasses=j.classes; S.tcls=""; S.tlist=[]; });
   }
 });
+Object.assign(A,{
+  cvtab(v){ S.cvTab=v==="guess"?"guess":"friends"; S.gedit=false; render(); window.scrollTo(0,0); if(S.cvTab==="guess") return loadGuess(); },
+  tguess(v){ A.classview(v); return A.cvtab("guess"); },
+  gpick(v){ const el=document.getElementById("gwhy"); if(el) S.gtext=el.value; S.gpick=+v; render(); },
+  gedit(){ S.gedit=true; S.gpick=S.gv.mine.type; S.gtext=S.gv.mine.why; render(); },
+  gcancel(){ S.gedit=false; render(); },
+  async gsend(){
+    const me=cvMe(), el=document.getElementById("gwhy"), why=((el&&el.value)||"").trim();
+    if(!me) return;
+    if(!S.gpick){ toast("선생님의 유형을 하나 골라 주세요"); return; }
+    if(why.length<5){ toast("그렇게 생각한 까닭을 조금 더 적어 주세요"); if(el) el.focus(); return; }
+    S.gtext=why; toast("보내는 중이에요…");
+    try{ await api("guessSubmit",{code:S.vcls,name:me.name,pin:me.pin||"",type:S.gpick,why}); }catch(e){ toast(e.message); return; }
+    S.gedit=false; await loadGuess(); toast("내 생각을 보냈어요");
+  },
+  gset(v){
+    const g=S.gv; if(!g) return;
+    return tcall("setGuess",{code:S.vcls,[v]:!g[v]},j=>{ S.gv=j; });
+  }
+});
+
 function finish(){
   const rec={id:S.reuseId||("r"+Date.now().toString(36)+Math.random().toString(36).slice(2,6)),name:S.name,date:new Date().toISOString().slice(0,10),
     ans:S.ans.slice(),feel:{...S.feel},deep:S.deep.slice(),chosen:0,pledge:"",mode:S.mode||"private",cls:S.mode==="class"?S.cls:"",aud:S.mode==="private"?S.aud:"kid"};
@@ -1769,6 +1887,7 @@ document.addEventListener("input",e=>{
   if(e.target.id==="nm") S.name=e.target.value;
   if(e.target.id==="cc") S.ccode=e.target.value.toUpperCase();
   if(e.target.id==="pn") S.pin=e.target.value;
+  if(e.target.id==="gwhy") S.gtext=e.target.value;
   if((e.target.id==="nm"||e.target.id==="cc"||e.target.id==="pn") && S.found){ S.found=null; S.retake=false; }
   if(e.target.id==="pledge" && S.rec && !S.from){ S.rec.pledge=e.target.value; saveRecord(S.rec); pushSoon(S.rec); }
 });
