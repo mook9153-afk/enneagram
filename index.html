@@ -7,84 +7,116 @@
 <title>나를 찾는 에니어그램 여행</title>
 <style>
 :root{
-  --bg1:#fdf6ec; --bg2:#eaf4fb; --ink:#2f3542; --sub:#69707d; --line:#e3e6ee;
-  --card:#ffffff; --main:#5b8def; --main-d:#3f6fd1; --soft:#f1f5ff; --ok:#33b28a; --warn:#f08a5d;
+  --paper:#f5f0e8; --surface:#fffdf9; --ink:#2b2724; --sub:#756b62; --line:#e4dccf;
+  --main:#2f5d50; --main-d:#234a3f; --soft:#edf2ed; --accent:#b9684a; --warn:#b9684a;
+  --serif:"Noto Serif KR","Nanum Myeongjo","AppleMyungjo","Batang","바탕",serif;
+  --sans:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕",sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font-family:"Pretendard","Noto Sans KR","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo",sans-serif;
-  color:var(--ink);background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;min-height:100vh;
-  line-height:1.6;word-break:keep-all;-webkit-text-size-adjust:100%}
-#app{max-width:760px;margin:0 auto;padding:20px 16px 60px}
-h1{font-size:1.7rem;margin:.2em 0;line-height:1.3}
-h2{font-size:1.25rem;margin:1.2em 0 .5em}
-h3{font-size:1.05rem;margin:1em 0 .3em}
-p{margin:.5em 0}
-.card{background:var(--card);border-radius:22px;padding:22px;box-shadow:0 6px 24px rgba(60,80,120,.10);margin:14px 0}
+body{font-family:var(--sans);color:var(--ink);background:var(--paper);min-height:100vh;
+  line-height:1.7;word-break:keep-all;-webkit-text-size-adjust:100%;font-size:16px}
+#app{max-width:720px;margin:0 auto;padding:28px 18px 72px}
+h1{font-family:var(--serif);font-size:1.75rem;font-weight:700;margin:.2em 0;line-height:1.35;letter-spacing:-.01em}
+h2{font-size:1.12rem;font-weight:700;margin:1.6em 0 .6em;padding-left:11px;border-left:3px solid var(--accent);line-height:1.35}
+h3{font-size:.98rem;font-weight:700;margin:1.3em 0 .4em;color:var(--main-d)}
+p{margin:.55em 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px 24px;margin:16px 0;box-shadow:0 1px 2px rgba(60,45,30,.04)}
+.card > h2:first-child, .card > .row:first-child h1{margin-top:0}
 .center{text-align:center}
-.sub{color:var(--sub);font-size:.95rem}
-.big-emoji{font-size:4.2rem;line-height:1.1}
-.btn{display:inline-block;border:0;border-radius:16px;padding:14px 22px;font-size:1.05rem;font-weight:700;
-  font-family:inherit;cursor:pointer;background:var(--main);color:#fff;transition:transform .08s,background .15s}
-.btn:hover{background:var(--main-d)} .btn:active{transform:scale(.97)}
-.btn.ghost{background:#fff;color:var(--main-d);border:2px solid #cfdcf8}
+.sub{color:var(--sub);font-size:.92rem}
+.big-emoji{font-size:3.2rem;line-height:1}
+.big-emoji:empty, .e:empty{display:none}
+.btn{display:inline-block;border:1px solid var(--main);border-radius:10px;padding:13px 22px;font-size:1rem;font-weight:700;
+  font-family:inherit;cursor:pointer;background:var(--main);color:#fff;transition:background .15s,transform .08s;letter-spacing:.01em}
+.btn:hover{background:var(--main-d)} .btn:active{transform:translateY(1px)}
+.btn.ghost{background:transparent;color:var(--main-d);border-color:#c9d3c8}
 .btn.ghost:hover{background:var(--soft)}
-.btn.small{padding:9px 14px;font-size:.92rem;border-radius:12px}
+.btn.small{padding:8px 14px;font-size:.88rem;border-radius:8px}
 .btn.wide{display:block;width:100%}
 .btn:disabled{opacity:.4;cursor:not-allowed}
-.btn.danger{background:#fff;color:#d2504b;border:2px solid #f3cfcd}
+.btn.danger{background:transparent;color:#a8463c;border-color:#e3c4bd}
+.btn.danger:hover{background:#f8ece8}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .row.between{justify-content:space-between}
 .row.mid{justify-content:center}
-input[type=text],input[type=password],textarea{width:100%;font:inherit;font-size:1.1rem;padding:13px 15px;
-  border:2px solid var(--line);border-radius:14px;background:#fff;color:var(--ink)}
-select{font:inherit;font-size:1.1rem;padding:11px 14px;border:2px solid var(--line);border-radius:14px;background:#fff;color:var(--ink)}
-input:focus,textarea:focus,select:focus,button:focus-visible{outline:3px solid #b9cdfa;outline-offset:2px}
-.steps{display:flex;gap:8px;margin:8px 0 0}
-.steps span{flex:1;text-align:center;font-size:.82rem;padding:7px 4px;border-radius:999px;background:#fff;color:var(--sub);border:2px solid var(--line)}
-.steps span.on{background:var(--main);color:#fff;border-color:var(--main);font-weight:700}
-.steps span.done{background:#e3f6ef;color:#1f8a68;border-color:#bfe8d9}
-.bar{height:12px;background:#e6ebf5;border-radius:99px;overflow:hidden;margin:10px 0}
-.bar i{display:block;height:100%;background:linear-gradient(90deg,#7fb0ff,#5b8def);border-radius:99px;transition:width .25s}
-.opt{display:flex;gap:12px;align-items:center;width:100%;text-align:left;font:inherit;font-size:1.08rem;
-  background:#fff;border:2px solid var(--line);border-radius:16px;padding:16px;margin:10px 0;cursor:pointer;color:var(--ink)}
-.opt:hover{border-color:#b9cdfa;background:var(--soft)}
-.opt.sel{border-color:var(--main);background:#e8f0ff;font-weight:700}
-.opt .n{flex:none;width:34px;height:34px;border-radius:50%;background:#eef2fb;display:grid;place-items:center;font-weight:700;color:var(--main-d)}
-.opt.sel .n{background:var(--main);color:#fff}
-.qstem{font-size:1.35rem;font-weight:800;margin:6px 0 14px;line-height:1.4}
-.tone{font-size:.9rem;font-weight:700;color:#7a5a2b;background:#fff3d9;display:inline-block;padding:4px 12px;border-radius:99px;margin:14px 0 2px}
-.note{background:#fff8e6;border:2px dashed #f2d48a;border-radius:16px;padding:14px 16px;margin:12px 0}
-.calm{background:#e9f8f1;border:2px solid #bfe8d9;border-radius:16px;padding:14px 16px;margin:12px 0}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:99px;border:2px solid var(--line);background:#fff;
-  font:inherit;font-weight:700;cursor:pointer;color:var(--ink)}
+input[type=text],input[type=password],textarea,select{width:100%;font:inherit;font-size:1.02rem;padding:12px 14px;
+  border:1px solid #d6cdbf;border-radius:10px;background:#fff;color:var(--ink)}
+select{width:auto}
+input::placeholder,textarea::placeholder{color:#b3a99c}
+input:focus,textarea:focus,select:focus,button:focus-visible{outline:2px solid #9fbcae;outline-offset:2px;border-color:var(--main)}
+label b{font-size:.95rem}
+/* 단계 표시 */
+.steps{display:flex;gap:0;margin:0 0 4px;border-bottom:1px solid var(--line)}
+.steps span{flex:1;text-align:center;font-size:.8rem;padding:10px 4px 9px;color:#a79d91;border-bottom:2px solid transparent;margin-bottom:-1px}
+.steps span.on{color:var(--main-d);border-bottom-color:var(--main);font-weight:700}
+.steps span.done{color:var(--sub)}
+.bar{height:6px;background:#e9e2d6;border-radius:99px;overflow:hidden;margin:10px 0 18px}
+.bar i{display:block;height:100%;background:var(--main);border-radius:99px;transition:width .25s}
+/* 보기 */
+.opt{display:flex;gap:14px;align-items:center;width:100%;text-align:left;font:inherit;font-size:1.03rem;line-height:1.55;
+  background:#fff;border:1px solid #d9d0c2;border-radius:12px;padding:15px 16px;margin:10px 0;cursor:pointer;color:var(--ink);transition:border-color .12s,background .12s}
+.opt:hover{border-color:#9fbcae;background:#fbfaf6}
+.opt.sel{border-color:var(--main);background:var(--soft);box-shadow:inset 0 0 0 1px var(--main)}
+.opt .n{flex:none;width:32px;height:32px;border-radius:50%;border:1px solid #cfc6b8;background:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem;color:var(--sub)}
+.opt.sel .n{background:var(--main);border-color:var(--main);color:#fff}
+.qstem{font-family:var(--serif);font-size:1.32rem;font-weight:700;margin:4px 0 16px;line-height:1.5}
+.tone{font-size:.84rem;font-weight:700;color:#7a5a3a;border-bottom:1px solid #e3d5bf;display:block;padding:14px 0 6px;margin:6px 0 2px}
+.note{background:#faf4e6;border:1px solid #eadfc6;border-left:3px solid #c9a55a;border-radius:10px;padding:14px 16px;margin:14px 0;font-size:.95rem}
+.calm{background:#eef3ee;border:1px solid #d5e0d6;border-left:3px solid #6f9a80;border-radius:10px;padding:14px 16px;margin:14px 0;font-size:.95rem}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:99px;border:1px solid #d6cdbf;background:#fff;
+  font:inherit;font-size:.92rem;font-weight:600;cursor:pointer;color:var(--ink)}
+.chip:hover{border-color:#9fbcae}
 .chip.sel{color:#fff;border-color:transparent}
-.tag{display:inline-block;font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:99px;background:#eef2fb;color:var(--main-d)}
-.hero{border-radius:22px;padding:26px 20px;color:#fff;text-align:center}
-.hero h1{color:#fff;margin:.1em 0}
-.hero .sub{color:rgba(255,255,255,.92)}
-ul.clean{padding-left:1.15em;margin:.3em 0}
-ul.clean li{margin:.25em 0}
+.tag{display:inline-block;font-size:.76rem;font-weight:700;padding:2px 9px;border-radius:99px;background:#efe9df;color:#6a5f55;letter-spacing:.02em}
+/* 결과 머리 */
+.hero{border-radius:14px;padding:32px 22px 28px;color:#fff;text-align:center}
+.hero h1{color:#fff;margin:.35em 0 .1em;font-size:1.9rem}
+.hero .sub{color:rgba(255,255,255,.9)}
+.hero .big-emoji{display:inline-grid;place-items:center;width:92px;height:92px;border-radius:50%;background:rgba(255,255,255,.94);font-size:2.9rem;margin-top:10px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+ul.clean{padding-left:1.1em;margin:.3em 0}
+ul.clean li{margin:.3em 0}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-@media(max-width:560px){.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}h1{font-size:1.45rem}.qstem{font-size:1.2rem}}
-.tcard{border:2px solid var(--line);border-radius:18px;padding:14px;background:#fff;text-align:center;cursor:pointer;font:inherit;color:var(--ink)}
-.tcard:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(60,80,120,.12)}
-.tcard .e{font-size:2.2rem}
-.tcard b{display:block}
-.box{border-radius:16px;padding:14px 16px;margin:10px 0;background:#f7f9fd}
-.box.good{background:#eaf7f1}.box.grow{background:#fff4e8}.box.friend{background:#eef2ff}.box.heart{background:#fdeef3}
-.hbar{display:grid;grid-template-columns:150px 1fr 34px;gap:8px;align-items:center;margin:6px 0;font-size:.92rem}
-.hbar .track{height:14px;background:#e9edf5;border-radius:99px;overflow:hidden}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}.grid3{grid-template-columns:1fr 1fr}h1{font-size:1.5rem}.qstem{font-size:1.18rem}.card{padding:22px 18px}}
+.tcard{border:1px solid #d9d0c2;border-radius:12px;padding:16px;background:#fff;text-align:left;cursor:pointer;font:inherit;color:var(--ink);transition:border-color .12s,box-shadow .12s}
+.tcard:hover{border-color:#9fbcae;box-shadow:0 2px 8px rgba(60,45,30,.07)}
+.tcard .e{font-size:1.9rem;line-height:1.2;margin-bottom:4px}
+.tcard b{display:block;font-size:1.02rem;margin-bottom:2px}
+/* 설명 칸 */
+.box{border-radius:10px;padding:14px 16px;margin:12px 0;background:#faf6ef;border:1px solid #ece4d6}
+.box > b:first-child{display:inline-block;font-size:.9rem;letter-spacing:.02em;color:var(--main-d);margin-bottom:2px}
+.box.good{background:#f1f5f0;border-color:#dbe5db;border-left:3px solid #6f9a80}
+.box.grow{background:#faf3e6;border-color:#ecdfc6;border-left:3px solid #c9a55a}
+.box.friend{background:#eff2f4;border-color:#dbe1e6;border-left:3px solid #7d93a6}
+.box.heart{background:#f8eeea;border-color:#ecd9d2;border-left:3px solid #c08873}
+.hbar{display:grid;grid-template-columns:150px 1fr 34px;gap:8px;align-items:center;margin:7px 0;font-size:.9rem}
+.hbar .track{height:10px;background:#ebe5da;border-radius:99px;overflow:hidden}
 .hbar .track i{display:block;height:100%;border-radius:99px}
-@media(max-width:560px){.hbar{grid-template-columns:110px 1fr 30px;font-size:.85rem}}
+@media(max-width:560px){.hbar{grid-template-columns:112px 1fr 30px;font-size:.84rem}}
 table{border-collapse:collapse;width:100%;font-size:.9rem}
-th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
-.foot{margin-top:26px;text-align:center;font-size:.85rem;color:var(--sub)}
-.linkbtn{background:none;border:0;color:var(--sub);text-decoration:underline;font:inherit;font-size:.9rem;cursor:pointer;padding:6px}
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#2f3542;color:#fff;padding:12px 20px;border-radius:99px;font-weight:700;z-index:9;max-width:90vw}
+th,td{border-bottom:1px solid var(--line);padding:10px 8px;text-align:left;vertical-align:top}
+th{color:var(--sub);font-weight:700;font-size:.84rem;white-space:nowrap}
+details > summary{cursor:pointer}
+.foot{margin-top:30px;text-align:center;font-size:.84rem;color:var(--sub)}
+.linkbtn{background:none;border:0;color:var(--sub);text-decoration:underline;text-underline-offset:3px;font:inherit;font-size:.86rem;cursor:pointer;padding:6px}
+.linkbtn:hover{color:var(--main-d)}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#2b2724;color:#fff;padding:11px 20px;border-radius:10px;font-weight:600;font-size:.95rem;z-index:9;max-width:90vw;box-shadow:0 4px 16px rgba(0,0,0,.18)}
+/* 첫 화면 */
+.hero-home{text-align:center;padding:26px 8px 10px}
+.hero-home svg{width:112px;height:112px;display:block;margin:0 auto 14px}
+.eyebrow{font-size:.78rem;letter-spacing:.22em;color:var(--accent);font-weight:700;margin:0 0 6px}
+.hero-home h1{font-size:2.05rem;margin:0 0 12px}
+.lead{color:var(--sub);font-size:1rem;max-width:30em;margin:0 auto;line-height:1.8}
+.steps-list{list-style:none;padding:0;margin:0;counter-reset:st}
+.steps-list li{counter-increment:st;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;padding:11px 0;border-bottom:1px solid var(--line)}
+.steps-list li:last-child{border-bottom:0}
+.steps-list li::before{content:counter(st);width:30px;height:30px;border-radius:50%;border:1px solid var(--main);color:var(--main-d);display:grid;place-items:center;font-weight:700;font-size:.88rem;font-family:var(--serif)}
+.steps-list b{display:block}
+.steps-list span{color:var(--sub);font-size:.93rem}
+@media(max-width:560px){.hero-home h1{font-size:1.7rem}}
 @media print{
-  body{background:#fff}.noprint{display:none!important}.card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}
+  body{background:#fff}.noprint{display:none!important}.card{box-shadow:none;break-inside:avoid}
   #app{max-width:none;padding:0}
 }
 </style>
@@ -206,17 +238,17 @@ const DEEP_K = [
 ];
 
 const CENTER = {
- gut:{name:"몸(장) 중심",e:"💪",types:[8,9,1],desc:"먼저 몸으로 느끼고 행동해요. 화가 날 때 어떻게 하느냐가 중요한 유형이에요."},
- heart:{name:"마음(가슴) 중심",e:"💗",types:[2,3,4],desc:"사람들과의 관계와 느낌이 중요해요. 내가 어떻게 보일지에 마음을 많이 써요."},
- head:{name:"머리 중심",e:"💡",types:[5,6,7],desc:"먼저 생각하고 살펴봐요. 걱정과 불안을 어떻게 다루느냐가 중요한 유형이에요."}
+ gut:{name:"몸(장) 중심",e:"",types:[8,9,1],desc:"먼저 몸으로 느끼고 행동해요. 화가 날 때 어떻게 하느냐가 중요한 유형이에요."},
+ heart:{name:"마음(가슴) 중심",e:"",types:[2,3,4],desc:"사람들과의 관계와 느낌이 중요해요. 내가 어떻게 보일지에 마음을 많이 써요."},
+ head:{name:"머리 중심",e:"",types:[5,6,7],desc:"먼저 생각하고 살펴봐요. 걱정과 불안을 어떻게 다루느냐가 중요한 유형이에요."}
 };
 const LETTER = {
- A:"💪 몸으로 (행동)", B:"💗 마음으로 (느낌)", C:"💡 머리로 (생각)",
- D:"🚀 앞으로 나서기", E:"🌙 한 걸음 물러나기", F:"🤝 맞추고 책임지기"
+ A:"몸으로 (행동)", B:"마음으로 (느낌)", C:"머리로 (생각)",
+ D:"앞으로 나서기", E:"한 걸음 물러나기", F:"맞추고 책임지기"
 };
 
 const TYPES_K = {
-1:{nick:"꼼꼼한 바른이",e:"🐝",ani:"벌",color:"#e2574c",center:"gut",one:"바르고 정확하게, 최선을 다하는 친구",
+1:{nick:"꼼꼼한 바른이",e:"🐝",ani:"벌",color:"#b9553f",center:"gut",one:"바르고 정확하게, 최선을 다하는 친구",
   desc:"옳고 바른 것을 좋아하고, 맡은 일은 꼼꼼하게 끝까지 해내요. 약속과 규칙을 잘 지키고, 더 좋은 방법이 없을까 늘 고민해요.",
   good:["학급 규칙을 정할 때 가장 꼼꼼하게 계획을 세워요.","맡은 역할은 누가 보지 않아도 책임지고 해내요.","정직하고 공평해서 친구들이 믿고 따라요."],
   grow:["실수해도 괜찮아요. '이 정도면 충분해!' 하고 나를 칭찬해 봐요.","다른 사람의 실수도 너그럽게 이해해 봐요.","가끔은 신나게 놀면서 쉬는 것도 중요해요."],
@@ -226,7 +258,7 @@ const TYPES_K = {
   how:"약속을 잘 지켜 주고, 잘못을 지적받아도 '도와주려는 마음'이라는 걸 알아주세요. 같이 놀자고 먼저 말해 주면 좋아해요.",
   low:"작은 것까지 따지고 짜증이 늘 수 있어요.",high:"차분하게 옳은 일을 해내요.",
   mission:["오늘 한 실수 하나를 '괜찮아' 하고 넘어가 보기","친구의 다른 방법을 칭찬해 보기","10분 동안 아무 계획 없이 놀아 보기"]},
-2:{nick:"다정한 도우미",e:"🐶",ani:"강아지",color:"#f08a5d",center:"heart",one:"친구의 마음을 잘 알아채고 도와주는 친구",
+2:{nick:"다정한 도우미",e:"🐶",ani:"강아지",color:"#cc7a52",center:"heart",one:"친구의 마음을 잘 알아채고 도와주는 친구",
   desc:"다른 사람의 기분을 잘 알아차리고, 힘들어하는 친구가 있으면 먼저 다가가요. 따뜻하고 상냥해서 주변 사람들을 기분 좋게 해 줘요.",
   good:["모둠 활동에서 어려워하는 친구를 가장 먼저 도와줘요.","친구의 좋은 점을 잘 찾아 칭찬해 줘요.","누구와도 금방 친해져요."],
   grow:["친구를 돕기 전에 '내 마음은 어떤지' 먼저 살펴봐요.","하기 싫을 때는 '싫어'라고 말해도 괜찮아요.","고맙다는 말을 못 들어도 내가 한 일은 소중해요."],
@@ -236,7 +268,7 @@ const TYPES_K = {
   how:"도움을 받으면 꼭 고맙다고 말해 주세요. 그리고 '너는 뭐 하고 싶어?' 하고 그 친구의 생각도 먼저 물어봐 주세요.",
   low:"지나치게 참견하고 서운해할 수 있어요.",high:"따뜻하게 마음을 나눠요.",
   mission:["오늘 내가 원하는 것 한 가지를 친구에게 말해 보기","나에게 '수고했어' 하고 말해 주기","부탁을 한 번 정중하게 거절해 보기"]},
-3:{nick:"반짝이는 도전왕",e:"🦅",ani:"독수리",color:"#e8a71b",center:"heart",one:"목표를 세우고 멋지게 해내는 친구",
+3:{nick:"반짝이는 도전왕",e:"🦅",ani:"독수리",color:"#c2952f",center:"heart",one:"목표를 세우고 멋지게 해내는 친구",
   desc:"목표가 생기면 열심히 노력해서 꼭 해내려고 해요. 자신감이 있고, 무엇이든 빠르고 멋지게 잘하고 싶어 해요.",
   good:["발표회 때 누구보다 열심히 준비해서 좋은 결과를 내요.","무엇을 어떻게 하면 될지 빨리 알아내요.","친구들에게 '나도 할 수 있어!' 하는 힘을 줘요."],
   grow:["결과만큼 준비하는 과정도 소중하게 여겨 봐요.","못해도 괜찮아요. 나는 있는 그대로 소중해요.","지금 내 기분이 어떤지 천천히 느껴 봐요."],
@@ -246,7 +278,7 @@ const TYPES_K = {
   how:"잘한 점을 구체적으로 칭찬해 주세요. 졌을 때는 놀리지 말고 '과정이 멋졌어'라고 말해 주세요.",
   low:"결과에만 매달리고 마음이 급해질 수 있어요.",high:"자신 있게 목표를 향해 움직여요.",
   mission:["이기고 지는 것이 없는 놀이를 해 보기","오늘 내 기분을 한 문장으로 적어 보기","친구가 잘한 일을 먼저 축하해 주기"]},
-4:{nick:"감성 가득 예술가",e:"🐴",ani:"말",color:"#9b6fd0",center:"heart",one:"느낌이 풍부하고 나만의 색깔이 있는 친구",
+4:{nick:"감성 가득 예술가",e:"🐴",ani:"말",color:"#7f6390",center:"heart",one:"느낌이 풍부하고 나만의 색깔이 있는 친구",
   desc:"느낌이 풍부하고 상상력이 좋아요. 남들과 똑같은 것보다 나만의 특별한 것을 좋아하고, 아름다운 것을 잘 알아봐요.",
   good:["미술이나 글쓰기 시간에 독특하고 개성 있는 생각을 표현해요.","친구의 속상한 마음을 깊이 이해해 줘요.","작은 것에서도 아름다움을 찾아내요."],
   grow:["기분이 가라앉을 때는 몸을 움직이거나 친구와 어울려 봐요.","남과 비교하지 않아도 나는 이미 특별해요.","기분이 내키지 않아도 해야 할 일을 조금씩 해 봐요."],
@@ -256,7 +288,7 @@ const TYPES_K = {
   how:"속상해할 때는 조언보다 먼저 차분히 들어 주세요. 그 친구가 만든 것, 생각한 것을 관심 있게 봐 주세요.",
   low:"기분이 가라앉고 혼자 속상해할 수 있어요.",high:"내 마음을 솔직하고 아름답게 표현해요.",
   mission:["오늘 고마운 것 세 가지 찾아보기","속상한 마음을 그림이나 글로 표현해 보기","친구의 좋은 점을 부러워하는 대신 칭찬해 보기"]},
-5:{nick:"궁금한 탐험가",e:"🦉",ani:"올빼미",color:"#4a7fd6",center:"head",one:"조용히 관찰하고 깊이 생각하는 친구",
+5:{nick:"궁금한 탐험가",e:"🦉",ani:"올빼미",color:"#44708f",center:"head",one:"조용히 관찰하고 깊이 생각하는 친구",
   desc:"궁금한 것이 생기면 끝까지 알아내고 싶어 해요. 혼자 생각하는 시간을 좋아하고, 차분하게 관찰을 잘해요.",
   good:["궁금한 점을 끝까지 파헤쳐 모둠의 '지식 전문가'가 돼요.","흥분하지 않고 차분하게 문제를 살펴봐요.","혼자서도 집중해서 잘 해내요."],
   grow:["알게 된 것을 친구들에게 친절하게 나눠 줘요.","생각만 하지 말고 일단 한번 해 봐요.","내 마음과 느낌도 말로 표현해 봐요."],
@@ -266,7 +298,7 @@ const TYPES_K = {
   how:"혼자만의 시간을 존중해 주세요. 말이 짧아도 끝까지 들어 주고, 관심 있는 것을 물어보면 신나게 이야기해 줄 거예요.",
   low:"혼자 틀어박혀 말이 없어질 수 있어요.",high:"차분히 관찰하고 깊이 생각해요.",
   mission:["알고 있는 것 하나를 친구에게 알려 주기","친구에게 먼저 인사하거나 말을 걸어 보기","오늘 느낀 감정 하나를 말로 표현해 보기"]},
-6:{nick:"믿음직한 의리파",e:"🦌",ani:"사슴",color:"#2f9e8f",center:"head",one:"조심스럽고 책임감 있는, 의리 있는 친구",
+6:{nick:"믿음직한 의리파",e:"🦌",ani:"사슴",color:"#3f8476",center:"head",one:"조심스럽고 책임감 있는, 의리 있는 친구",
   desc:"미리 준비하고 조심해서 실수를 줄여요. 친구와의 약속을 잘 지키고, 한번 믿은 친구는 끝까지 아껴 줘요.",
   good:["우리 반의 안전과 규칙을 중요하게 생각하고 잘 지켜요.","일어날 수 있는 문제를 미리 알아채고 준비해요.","맡은 일을 성실하게 하고 친구를 끝까지 믿어 줘요."],
   grow:["걱정될 때 '잘될 거야' 하고 나를 믿어 봐요.","혼자 정하기 어려워도 내 생각대로 한번 결정해 봐요.","나쁜 일보다 좋았던 일을 더 많이 떠올려 봐요."],
@@ -276,7 +308,7 @@ const TYPES_K = {
   how:"약속을 꼭 지켜 주세요. 걱정을 말할 때 '별거 아니야' 하고 넘기지 말고 들어 준 다음 응원해 주세요.",
   low:"걱정이 커지고 의심이 많아질 수 있어요.",high:"친구를 믿고 함께 힘을 모아요.",
   mission:["걱정 하나를 종이에 적고 '괜찮아' 하고 접어 두기","오늘 내가 잘한 일 세 가지 적어 보기","작은 일 하나를 누구에게도 묻지 않고 스스로 정해 보기"]},
-7:{nick:"신나는 즐거움이",e:"🦋",ani:"나비",color:"#f2a03d",center:"head",one:"밝고 재미있는 생각이 넘치는 친구",
+7:{nick:"신나는 즐거움이",e:"🦋",ani:"나비",color:"#cf8c3f",center:"head",one:"밝고 재미있는 생각이 넘치는 친구",
   desc:"호기심이 많고 새로운 것을 좋아해요. 재미있는 생각이 톡톡 튀어나오고, 함께 있으면 주변이 밝아져요.",
   good:["놀이나 계획을 세울 때 분위기를 밝고 재미있게 만들어요.","새로운 아이디어를 잘 떠올려요.","힘든 일도 긍정적으로 바라봐요."],
   grow:["하고 싶은 일이 많아도 하나를 끝까지 마무리해 봐요.","힘들고 지루한 일도 피하지 않고 해 보면 더 멋져져요.","속상한 마음도 숨기지 말고 느껴 봐요."],
@@ -286,7 +318,7 @@ const TYPES_K = {
   how:"아이디어를 재미있게 들어 주세요. 맡은 일을 끝까지 하도록 옆에서 같이 해 주면 큰 도움이 돼요.",
   low:"이것저것 벌이기만 하고 산만해질 수 있어요.",high:"밝고 즐겁게 새로운 것을 시도해요.",
   mission:["시작한 일 하나를 끝까지 마무리하기","친구 이야기를 끼어들지 않고 끝까지 들어 보기","5분 동안 조용히 앉아 숨쉬기"]},
-8:{nick:"씩씩한 대장",e:"🐯",ani:"호랑이",color:"#c94f6d",center:"gut",one:"용기 있게 앞장서고 친구를 지켜 주는 친구",
+8:{nick:"씩씩한 대장",e:"🐯",ani:"호랑이",color:"#a54a5c",center:"gut",one:"용기 있게 앞장서고 친구를 지켜 주는 친구",
   desc:"힘이 넘치고 하고 싶은 말을 당당하게 해요. 옳지 않은 일을 보면 가만히 있지 않고, 약한 친구를 지켜 주려고 해요.",
   good:["모둠 의견이 갈릴 때 용기 있게 해결 방법을 내놓아요.","억울한 친구가 있으면 나서서 도와줘요.","결정을 빨리 하고 힘 있게 밀고 나가요."],
   grow:["친구의 의견을 먼저 들어 주면 더 큰 믿음을 받아요.","화가 날 때는 숨을 크게 세 번 쉬고 말해요.","힘들 때 '도와줘'라고 말하는 것도 용기예요."],
@@ -296,7 +328,7 @@ const TYPES_K = {
   how:"돌려 말하지 말고 솔직하게 말해 주세요. 목소리가 커도 겁먹지 말고, 내 생각도 또박또박 말하면 존중해 줘요.",
   low:"목소리가 커지고 내 마음대로 하려고 할 수 있어요.",high:"용기 있게 앞장서고 친구를 지켜 줘요.",
   mission:["말하기 전에 친구 의견 먼저 물어보기","화날 때 숨 세 번 쉬고 말하기","친구에게 부드럽게 '고마워' 말하기"]},
-9:{nick:"포근한 평화지킴이",e:"🐋",ani:"고래",color:"#57a773",center:"gut",one:"느긋하고 편안해서 모두와 잘 지내는 친구",
+9:{nick:"포근한 평화지킴이",e:"🐋",ani:"고래",color:"#5c8e69",center:"gut",one:"느긋하고 편안해서 모두와 잘 지내는 친구",
   desc:"마음이 넓고 느긋해요. 싸우는 것을 싫어하고, 누구의 이야기든 잘 들어 줘서 함께 있으면 편안해요.",
   good:["다툼이 있을 때 가운데서 서로의 이야기를 잘 들어 줘요.","누구와도 편하게 잘 지내요.","친구를 있는 그대로 받아 줘요."],
   grow:["내가 정말 원하는 것이 무엇인지 당당하게 말해 봐요.","할 일을 미루지 말고 작은 것부터 시작해 봐요.","'아무거나' 대신 내가 하나를 골라 봐요."],
@@ -605,11 +637,11 @@ V.home = () => {
   const lastId = sget("ennea_last"), last = lastId && records().find(r=>r.id===lastId && isClass(r));
   const classes = classList();
   const [gr,bn] = (/^\d+-\d+$/.test(S.cls)?S.cls:"5-1").split("-").map(Number);
-  const pick = "border-color:var(--main);background:#e8f0ff";
+  const pick = "border-color:var(--main);background:#edf2ed";
   const form = !S.mode ? "" : `
     <div class="${S.mode==="class"?"calm":"note"}">${S.mode==="class"
-      ? "🏫 <b>반에서 검사하기</b> — 검사가 끝나면 <b>선생님</b>이 내 결과를 볼 수 있고, <b>우리 반 친구들</b>은 내 이름과 유형(몇 번인지)을 볼 수 있어요. 내가 고른 답은 친구들에게 보이지 않아요."
-      : "🔒 <b>혼자 검사하기</b> — 결과는 선생님이나 다른 사람에게 전해지지 않고 <b>이 기기에서 나만</b> 볼 수 있어요. 여럿이 함께 쓰는 기기라면 다 본 뒤에 '내 결과 지우기'를 눌러 주세요."}</div>
+      ? "<b>반에서 검사하기</b> — 검사가 끝나면 <b>선생님</b>이 내 결과를 볼 수 있고, <b>우리 반 친구들</b>은 내 이름과 유형(몇 번인지)을 볼 수 있어요. 내가 고른 답은 친구들에게 보이지 않아요."
+      : "<b>혼자 검사하기</b> — 결과는 선생님이나 다른 사람에게 전해지지 않고 <b>이 기기에서 나만</b> 볼 수 있어요. 여럿이 함께 쓰는 기기라면 다 본 뒤에 '내 결과 지우기'를 눌러 주세요."}</div>
     ${S.mode==="class" ? (ONLINE ? `
     <label for="cc"><b>선생님이 알려 준 반 코드를 적어 주세요</b></label>
     <input id="cc" type="text" maxlength="6" autocomplete="off" autocapitalize="characters" placeholder="예: AB3K7Q" value="${esc(S.ccode)}" style="text-transform:uppercase;letter-spacing:.25em;max-width:240px;margin:6px 0 12px;display:block">` : `
@@ -620,8 +652,8 @@ V.home = () => {
     </div>`) : `
     <label><b>누가 검사하나요?</b></label>
     <div class="row" style="margin:6px 0 12px">
-      <button class="chip ${S.aud!=="adult"?"sel":""}" style="${S.aud!=="adult"?"background:var(--main)":""}" data-act="aud" data-v="kid">🧒 어린이·청소년</button>
-      <button class="chip ${S.aud==="adult"?"sel":""}" style="${S.aud==="adult"?"background:var(--main)":""}" data-act="aud" data-v="adult">🧑 어른</button>
+      <button class="chip ${S.aud!=="adult"?"sel":""}" style="${S.aud!=="adult"?"background:var(--main)":""}" data-act="aud" data-v="kid">어린이·청소년</button>
+      <button class="chip ${S.aud==="adult"?"sel":""}" style="${S.aud==="adult"?"background:var(--main)":""}" data-act="aud" data-v="adult">어른</button>
       <span class="sub">${S.aud==="adult"?"어른용 문항과 설명으로 진행해요.":"쉬운 말로 된 문항으로 진행해요."}</span>
     </div>`}
 ${S.mode==="class"?`
@@ -632,48 +664,52 @@ ${S.mode==="class"?`
     <label for="nm"><b>이름이나 별명을 적어 주세요</b></label>
     <input id="nm" type="text" maxlength="20" placeholder="예: 하늘이" value="${esc(S.name)}" autocomplete="off">`}
     <p></p>
-    <button class="btn wide" data-act="start">시작하기 🚀</button>
+    <button class="btn wide" data-act="start">시작하기 </button>
     ${S.mode==="class"&&!S.found?`<p class="sub" style="margin-bottom:0">전에 검사한 적이 있으면 <b>같은 반, 같은 이름, 같은 비밀번호</b>를 넣고 시작하기를 누르세요. 이전 검사 결과를 볼 수 있어요.</p>`:""}
-    ${S.found?`<div class="calm" style="margin-top:12px">📂 <b>${esc(S.found.name)}</b> 이름으로 <b>${esc(S.found.date)}</b>에 검사한 결과가 있어요.
+    ${S.found?`<div class="calm" style="margin-top:12px"><b>${esc(S.found.name)}</b> 이름으로 <b>${esc(S.found.date)}</b>에 검사한 결과가 있어요.
       <div class="row" style="margin-top:10px"><button class="btn" data-act="viewprev">이전 검사 결과 보기</button><button class="btn ghost" data-act="retake">다시 검사하기</button></div>
       <p class="sub" style="margin-bottom:0">다시 검사하면 이전 결과는 새 결과로 바뀌어요.</p></div>`:""}`;
   return `
-  <div class="card center">
-    <div class="big-emoji">🧭</div>
+  <header class="hero-home">
+    <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="42" fill="none" stroke="#cfc4b3" stroke-width="1.2"/><polygon points="86.4,71.0 13.6,71.0 50.0,8.0" fill="none" stroke="#b9684a" stroke-width="1.3" stroke-linejoin="round"/><polygon points="77.0,17.8 64.4,89.5 91.4,42.7 23.0,17.8 35.6,89.5 8.6,42.7" fill="none" stroke="#2f5d50" stroke-width="1.3" stroke-linejoin="round"/><circle cx="77.0" cy="17.8" r="2.6" fill="#fffdf9" stroke="#2b2724" stroke-width="1.1"/><circle cx="91.4" cy="42.7" r="2.6" fill="#fffdf9" stroke="#2b2724" stroke-width="1.1"/><circle cx="86.4" cy="71.0" r="2.6" fill="#fffdf9" stroke="#2b2724" stroke-width="1.1"/><circle cx="64.4" cy="89.5" r="2.6" fill="#fffdf9" stroke="#2b2724" stroke-width="1.1"/><circle cx="35.6" cy="89.5" r="2.6" fill="#fffdf9" stroke="#2b2724" stroke-width="1.1"/><circle cx="13.6" cy="71.0" r="2.6" fill="#fffdf9" stroke="#2b2724" stroke-width="1.1"/><circle cx="8.6" cy="42.7" r="2.6" fill="#fffdf9" stroke="#2b2724" stroke-width="1.1"/><circle cx="23.0" cy="17.8" r="2.6" fill="#fffdf9" stroke="#2b2724" stroke-width="1.1"/><circle cx="50.0" cy="8.0" r="2.6" fill="#fffdf9" stroke="#2b2724" stroke-width="1.1"/></svg>
+    <p class="eyebrow">ENNEAGRAM</p>
     <h1>나를 찾는 에니어그램 여행</h1>
-    <p class="sub">사람의 성격을 9가지로 나누어 살펴보는 '에니어그램'으로<br>나는 어떤 사람인지, 나와 다른 사람은 어떤 사람인지 알아봐요.</p>
-  </div>
+    <p class="lead">사람의 마음이 움직이는 아홉 가지 길을 따라가 봅니다.<br>나는 어떤 사람인지, 나와 다른 사람은 어떤 사람인지 천천히 알아보는 시간이에요.</p>
+  </header>
   <div class="card">
-    <h2 style="margin-top:0">이렇게 진행해요</h2>
-    <ul class="clean">
-      <li><b>① 느낌 찾기</b> — 9가지 말을 듣고 내 몸과 마음이 어떻게 반응하는지 느껴 봐요.</li>
-      <li><b>② 검사지 60문항</b> — 나와 가장 비슷한 것을 하나씩 골라요.</li>
-      <li><b>③ 마음 질문 4개</b> — 내가 왜 그렇게 행동하는지 생각해 봐요.</li>
-      <li><b>④ 결과</b> — 나의 유형과 강점, 다른 유형도 알아봐요.</li>
-    </ul>
-    <div class="note">
-      ✔ 정답이 없어요. 더 좋은 유형도, 나쁜 유형도 없어요.<br>
-      ✔ '되고 싶은 나' 말고 <b>'평소의 진짜 나'</b>를 솔직하게 골라요.<br>
-      ✔ 모두 나와 다르게 느껴지면, 가장 거리가 먼 것부터 지우고 남는 것을 골라요.<br>
-      ✔ 너무 오래 고민하지 말고 떠오르는 대로 골라요. (15분쯤 걸려요)
-    </div>
-    <h2>어떻게 검사할까요?</h2>
+    <h2 style="margin-top:0">어떻게 검사할까요?</h2>
     <div class="grid2">
       <button class="tcard" style="${S.mode==="private"?pick:""}" data-act="mode" data-v="private">
-        <div class="e">🔒</div><b>혼자 검사하기</b><span class="sub">나만 보는 결과예요<br>어린이·청소년, 어른 모두 할 수 있어요</span></button>
+        <b>혼자 검사하기</b><span class="sub">나만 보는 결과예요.<br>어린이·청소년, 어른 모두 할 수 있어요.</span></button>
       <button class="tcard" style="${S.mode==="class"?pick:""}" data-act="mode" data-v="class">
-        <div class="e">🏫</div><b>반에서 검사하기</b><span class="sub">선생님과 우리 반 친구들이<br>내 유형을 볼 수 있어요</span></button>
+        <b>반에서 검사하기</b><span class="sub">선생님이 알려 준 반 코드로 들어가요.<br>선생님과 반 친구들이 내 유형을 볼 수 있어요.</span></button>
     </div>
     ${form}
     ${prog && prog.name ? `<p></p><button class="btn ghost wide" data-act="resume">'${esc(prog.name)}' 하던 검사 이어서 하기</button>`:""}
     ${last ? `<p></p><button class="btn ghost wide" data-act="openrec" data-v="${esc(last.id)}">방금 한 내 결과 다시 보기 (${esc(last.name)})</button>`:""}
   </div>
+  <div class="card">
+    <h2 style="margin-top:0">이렇게 진행해요</h2>
+    <ol class="steps-list">
+      <li><div><b>느낌 찾기</b><span>아홉 가지 말을 듣고 내 몸과 마음이 어떻게 반응하는지 느껴 봐요.</span></div></li>
+      <li><div><b>검사지 60문항</b><span>평소의 나와 가장 비슷한 것을 하나씩 골라요. 15분쯤 걸려요.</span></div></li>
+      <li><div><b>마음 질문 4개</b><span>내가 왜 그렇게 행동하는지 생각해 봐요.</span></div></li>
+      <li><div><b>결과</b><span>추천 순위를 참고해서 나와 가장 비슷한 유형을 스스로 골라요.</span></div></li>
+    </ol>
+    <div class="note">
+      <b>검사하기 전에</b><br>
+      정답은 없어요. 더 좋은 유형도, 나쁜 유형도 없어요.<br>
+      '되고 싶은 나'가 아니라 <b>평소의 진짜 나</b>를 솔직하게 골라요.<br>
+      모두 나와 다르게 느껴지면, 가장 거리가 먼 것부터 지우고 남는 것을 골라요.<br>
+      너무 오래 고민하지 말고 떠오르는 대로 골라요.
+    </div>
+  </div>
   ${classes.length?`<div class="card">
-    <h2 style="margin-top:0">🏫 우리 반 친구들 유형 보기</h2>
+    <h2 style="margin-top:0">우리 반 친구들 유형 보기</h2>
     <div class="row">${classes.map(c=>`<button class="chip" data-act="classview" data-v="${esc(c)}">${esc(clsName(c))}</button>`).join("")}</div>
   </div>`:""}
   ${mine.length?`<div class="card">
-    <h2 style="margin-top:0">🔒 혼자 검사한 내 결과</h2>
+    <h2 style="margin-top:0">혼자 검사한 내 결과</h2>
     <p class="sub">이 기기에만 저장되어 있어요. 선생님 모드나 우리 반 화면에는 나오지 않아요.</p>
     ${mine.map(r=>{const c=calc(r),t=r.chosen||c.top,T=(r.aud==="adult"?TYPES_A:TYPES_K)[t];return `<div class="row" style="flex-wrap:nowrap"><button class="opt" style="margin:5px 0" data-act="openrec" data-v="${esc(r.id)}"><span class="n">${T.e}</span><span>${esc(r.name)} · ${t}번 ${T.nick} <span class="sub">(${esc(r.date)}${r.aud==="adult"?" · 어른용":""})</span></span></button><button class="linkbtn" style="flex:none" data-act="delmine" data-v="${esc(r.id)}">지우기</button></div>`}).join("")}
   </div>`:""}
@@ -694,7 +730,7 @@ V.feel = () => `
   <div class="card">
     <h1>① 느낌 찾기</h1>
     <p>지금부터 <b>듣기 싫은 말 9가지</b>를 읽어 볼 거예요.<br>누군가 진짜로 나에게 이런 말을 한다고 상상하면서 읽어 보세요.</p>
-    <div class="calm">🌿 이 말들은 <b>진짜가 아니에요.</b> 내 마음을 알아보기 위한 연습일 뿐이에요.<br>
+    <div class="calm">이 말들은 <b>진짜가 아니에요.</b> 내 마음을 알아보기 위한 연습일 뿐이에요.<br>
     먼저 숨을 깊게 들이마시고, 길게 내쉬어요. 머리로 생각하기보다 <b>몸과 마음의 느낌</b>에 귀 기울여요.</div>
     <p><b>읽었을 때 마음이 가장 크게 움직인 말(가장 듣기 싫은 말) 하나를 골라 주세요.</b></p>
     ${[0,1,2].map(g=>`<div class="tone">${FEEL_TONE[g]}</div>`+FEEL.filter(f=>f.g===g).map(f=>
@@ -726,7 +762,7 @@ V.feel2 = () => {
 V.calm = () => `
   ${stepsBar(1)}
   <div class="card center">
-    <div class="big-emoji">🌈</div>
+    <div class="big-emoji"></div>
     <h1>잘했어요!</h1>
     <p>듣기 싫은 말을 읽느라 마음이 조금 힘들었을 수 있어요.<br>
     방금 읽은 말들은 <b>모두 사실이 아니에요.</b> ${esc(S.name)}${ka(" 친구는"," 님은")} 있는 그대로 소중한 사람이에요.</p>
@@ -764,7 +800,7 @@ V.deep = () => {
     ${S.deepOrder[i].map((t,n)=>`<button class="opt ${S.deep[i]===t?"sel":""}" data-act="deep" data-v="${t}"><span class="n">${n+1}</span><span>${d.o[t-1]}</span></button>`).join("")}
     <div class="row between noprint" style="margin-top:14px">
       <button class="btn ghost" data-act="dprev">◀ 이전</button>
-      <button class="btn" data-act="dnext" ${S.deep[i]?"":"disabled"}>${i===3?"결과 보기 🎉":"다음 ▶"}</button>
+      <button class="btn" data-act="dnext" ${S.deep[i]?"":"disabled"}>${i===3?"결과 보기 ":"다음 ▶"}</button>
     </div>
   </div>`;
 };
@@ -773,14 +809,14 @@ function radarSVG(q, hi){
   const cx=170, cy=165, R=110, n=9, max=Math.max(40, ...Object.values(q));
   const pt=(i,r)=>{ const a=-Math.PI/2+i*2*Math.PI/n; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; };
   let s=`<svg viewBox="0 0 340 330" role="img" aria-label="유형별 검사지 점수 그래프" style="width:100%;max-width:420px;display:block;margin:0 auto">`;
-  [.25,.5,.75,1].forEach(k=>{ s+=`<polygon points="${ORDER.map((_,i)=>pt(i,R*k).map(v=>v.toFixed(1)).join(",")).join(" ")}" fill="none" stroke="#dfe4ee" stroke-width="1"/>`; });
-  ORDER.forEach((t,i)=>{ const [x,y]=pt(i,R); s+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e6eaf2"/>`; });
+  [.25,.5,.75,1].forEach(k=>{ s+=`<polygon points="${ORDER.map((_,i)=>pt(i,R*k).map(v=>v.toFixed(1)).join(",")).join(" ")}" fill="none" stroke="#ded6c8" stroke-width="1"/>`; });
+  ORDER.forEach((t,i)=>{ const [x,y]=pt(i,R); s+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#e6dfd2"/>`; });
   s+=`<polygon points="${ORDER.map((t,i)=>pt(i,R*q[t]/max).map(v=>v.toFixed(1)).join(",")).join(" ")}" fill="${TYPES[hi].color}33" stroke="${TYPES[hi].color}" stroke-width="2.5" stroke-linejoin="round"/>`;
   ORDER.forEach((t,i)=>{
     const [x,y]=pt(i,R*q[t]/max), [lx,ly]=pt(i,R+26);
     s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${t===hi?5:3.5}" fill="${TYPES[t].color}"/>`;
-    s+=`<text x="${lx.toFixed(1)}" y="${(ly-2).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="${t===hi?800:600}" fill="#2f3542">${t}번</text>`;
-    s+=`<text x="${lx.toFixed(1)}" y="${(ly+13).toFixed(1)}" text-anchor="middle" font-size="12" fill="#69707d">${q[t]}점</text>`;
+    s+=`<text x="${lx.toFixed(1)}" y="${(ly-2).toFixed(1)}" text-anchor="middle" font-size="13" font-weight="${t===hi?800:600}" fill="#2b2724">${t}번</text>`;
+    s+=`<text x="${lx.toFixed(1)}" y="${(ly+13).toFixed(1)}" text-anchor="middle" font-size="12" fill="#756b62">${q[t]}점</text>`;
   });
   return s+"</svg>";
 }
@@ -790,19 +826,19 @@ function typeDetail(t, c){
   let extra="";
   if(c){
     const w=wingOf(t,c.q);
-    extra=`<div class="box"><b>🪽 나의 날개</b><br>${w?`옆자리 유형 중 <b>${w}번 ${TYPES[w].nick}</b>의 모습도 조금 가지고 있어요. (${TYPES[w].one})`:`양옆 유형(${t===1?9:t-1}번, ${t===9?1:t+1}번)의 모습을 비슷하게 가지고 있어요.`}</div>`;
+    extra=`<div class="box"><b>나의 날개</b><br>${w?`옆자리 유형 중 <b>${w}번 ${TYPES[w].nick}</b>의 모습도 조금 가지고 있어요. (${TYPES[w].one})`:`양옆 유형(${t===1?9:t-1}번, ${t===9?1:t+1}번)의 모습을 비슷하게 가지고 있어요.`}</div>`;
   }
   return `
     <p>${T.desc}</p>
-    <p><span class="tag">${C.e} ${C.name}</span> <span class="sub">${C.desc}</span></p>
-    <div class="box good"><b>🌟 나의 강점</b><ul class="clean">${T.good.map(x=>`<li>${x}</li>`).join("")}</ul></div>
-    <div class="box grow"><b>🌱 이렇게 하면 더 멋져져요</b><ul class="clean">${T.grow.map(x=>`<li>${x}</li>`).join("")}</ul></div>
-    <div class="box heart"><b>💭 내 마음속 이야기</b><ul class="clean"><li><b>바라는 것:</b> ${T.want}</li><li><b>걱정되는 것:</b> ${T.fear}</li></ul></div>
+    <p><span class="tag">${C.name}</span> <span class="sub">${C.desc}</span></p>
+    <div class="box good"><b>나의 강점</b><ul class="clean">${T.good.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+    <div class="box grow"><b>이렇게 하면 더 멋져져요</b><ul class="clean">${T.grow.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+    <div class="box heart"><b>내 마음속 이야기</b><ul class="clean"><li><b>바라는 것:</b> ${T.want}</li><li><b>걱정되는 것:</b> ${T.fear}</li></ul></div>
     ${extra}
-    <div class="box"><b>🔄 상황에 따라 달라지는 나</b><ul class="clean">
+    <div class="box"><b>상황에 따라 달라지는 나</b><ul class="clean">
       <li><b>많이 힘들고 지칠 때</b> — ${STRESS[t]}번 유형의 아쉬운 모습처럼 ${TYPES[STRESS[t]].low}</li>
       <li><b>마음이 편안하고 자라날 때</b> — ${GROWTH[t]}번 유형의 좋은 모습처럼 ${TYPES[GROWTH[t]].high}</li></ul></div>
-    <div class="box friend"><b>🤝 ${ka("친구들과 잘 지내는 팁","관계를 위한 팁")}</b><br>${T.tip}</div>`;
+    <div class="box friend"><b>${ka("친구들과 잘 지내는 팁","관계를 위한 팁")}</b><br>${T.tip}</div>`;
 }
 
 V.result = () => {
@@ -818,12 +854,12 @@ V.result = () => {
     a.push(`검사지 ${c.q[t]}점(${c.qRank.indexOf(t)+1}번째)`);
     if(c.deepCount[t]) a.push(`마음 질문 ${c.deepCount[t]}번 선택`);
     return a.join(" · "); };
-  const medal = ["#f6c343","#cfd4dc","#e3ae82"];
+  const medal = ["#d9b25a","#cfc9bf","#d3a783"];
   const rankRow = (t,i) => { const n=rankNo(i); return `<button class="opt ${t===show?"sel":""}" data-act="show" data-v="${t}" style="align-items:flex-start">
-      <span class="n" style="${n<=3?`background:${medal[n-1]};color:#2f3542`:""}">${n}</span>
-      <span style="flex:1"><b>${TYPES[t].e} ${t}번 ${TYPES[t].nick}</b>${r.chosen===t?` <span class="tag" style="background:#e3f6ef;color:#1f8a68">✔ 내가 고른 유형</span>`:""}<br>
+      <span class="n" style="${n<=3?`background:${medal[n-1]};color:#2b2724`:""}">${n}</span>
+      <span style="flex:1"><b>${TYPES[t].e} ${t}번 ${TYPES[t].nick}</b>${r.chosen===t?` <span class="tag" style="background:#e6efe7;color:#2f6d57">✔ 내가 고른 유형</span>`:""}<br>
         <span class="sub" style="font-weight:400">${TYPES[t].one}</span>
-        <span style="display:block;height:8px;background:#e9edf5;border-radius:99px;margin:7px 0 4px;overflow:hidden"><i style="display:block;height:100%;width:${Math.round(c.total[t]/maxT*100)}%;background:${TYPES[t].color};border-radius:99px"></i></span>
+        <span style="display:block;height:8px;background:#ebe5da;border-radius:99px;margin:7px 0 4px;overflow:hidden"><i style="display:block;height:100%;width:${Math.round(c.total[t]/maxT*100)}%;background:${TYPES[t].color};border-radius:99px"></i></span>
         <span class="sub" style="font-weight:400;font-size:.85rem">${why(t)}</span></span></button>`; };
   return `
   ${readonly?"":stepsBar(4)}
@@ -832,15 +868,15 @@ V.result = () => {
     <div class="big-emoji">${TYPES[fin].e}</div>
     <h1>${fin}번 · ${TYPES[fin].nick}</h1>
     <div class="sub">${TYPES[fin].one}</div>
-    <div style="margin-top:12px"><span style="background:rgba(255,255,255,.25);padding:5px 16px;border-radius:99px;font-weight:700;font-size:.92rem">${r.chosen?"✔ 내가 고른 나의 유형":"🏅 추천 1순위 · 아직 내 유형을 고르지 않았어요"}</span></div>
+    <div style="margin-top:12px"><span style="background:rgba(255,255,255,.25);padding:5px 16px;border-radius:99px;font-weight:700;font-size:.92rem">${r.chosen?"✔ 내가 고른 나의 유형":"추천 1순위 · 아직 내 유형을 고르지 않았어요"}</span></div>
   </div>
   <div class="${isClass(r)?"calm":"note"}" style="text-align:center">${isClass(r)
-    ? "🏫 <b>"+esc(clsName(r.cls))+"</b>에서 검사했어요. 선생님이 결과를 볼 수 있고, 반 친구들은 내 이름과 유형을 볼 수 있어요.<span id='sync'>"+syncHTML(r)+"</span>"
-    : r.link ? "🔗 <b>저장해 둔 주소로 다시 연 결과</b>예요. 이 기기에서 나만 볼 수 있고, 첫 화면의 '혼자 검사한 내 결과'에도 남아요."
-    : "🔒 <b>혼자 검사한 결과</b>예요. 선생님이나 다른 사람에게 전해지지 않고 이 기기에서 나만 볼 수 있어요."}</div>
+    ? "<b>"+esc(clsName(r.cls))+"</b>에서 검사했어요. 선생님이 결과를 볼 수 있고, 반 친구들은 내 이름과 유형을 볼 수 있어요.<span id='sync'>"+syncHTML(r)+"</span>"
+    : r.link ? "<b>저장해 둔 주소로 다시 연 결과</b>예요. 이 기기에서 나만 볼 수 있고, 첫 화면의 '혼자 검사한 내 결과'에도 남아요."
+    : "<b>혼자 검사한 결과</b>예요. 선생님이나 다른 사람에게 전해지지 않고 이 기기에서 나만 볼 수 있어요."}</div>
 
-  <div class="card" style="border:3px solid #cfe0ff">
-    <h2 style="margin-top:0">🧭 나를 알아가는 여행</h2>
+  <div class="card" style="border:3px solid #e0d4bf">
+    <h2 style="margin-top:0">나를 알아가는 여행</h2>
     <p>${ka(
       `이 결과는 <b>정답이 아니라 출발점</b>이에요. 사람마다 자기만의 유형이 있지만, 검사 한 번으로 정확하게 드러나지 않을 수도 있어요. 그날의 기분에 따라, 또는 '평소의 나'가 아니라 '되고 싶은 나'를 골랐을 때 다르게 나오기도 하거든요.`,
       `이 결과는 <b>정답이 아니라 출발점</b>이에요. 누구에게나 기본 유형이 있지만, 한 번의 검사로 정확히 드러나지 않을 수 있어요. 그날의 상태, 지금 맡고 있는 역할, '되고 싶은 나'의 모습이 답에 섞이기 때문이에요.`)}</p>
@@ -850,46 +886,46 @@ V.result = () => {
   </div>
 
   <div class="card">
-    <h2 style="margin-top:0">🔎 세 가지 방법으로 찾아봤어요</h2>
+    <h2 style="margin-top:0">세 가지 방법으로 찾아봤어요</h2>
     <table>
       <tr><th>① 느낌 찾기</th><td>${f?`<b>${c.feelType}번 ${TYPES[c.feelType].nick}</b><br><span class="sub">가장 싫었던 말: “${f.text}”<br>올라온 느낌: ${re.e} ${re.name?re.name+" → "+re.types.join("·")+"번 유형과 가까워요":"잘 모르겠어요"}</span>`:"-"}</td></tr>
       <tr><th>② 검사지</th><td><b>${qTies.map(t=>`${t}번 ${TYPES[t].nick}`).join(", ")}</b> <span class="sub">(${c.q[c.qRank[0]]}점${qTies.length>1?", 점수가 같아요":""})</span></td></tr>
       <tr><th>③ 마음 질문</th><td>${c.deepTop.length?c.deepTop.map(t=>`<b>${t}번</b> <span class="sub">${c.deepCount[t]}번 선택</span>`).join(" · "):"-"}</td></tr>
     </table>
     <div class="${agree?"calm":"note"}">${agree
-      ? "🎯 세 가지 방법이 모두 같은 유형을 가리켜요! 그래도 설명을 읽어 보고 정말 나와 같은지 스스로 확인해 보세요."
+      ? "세 가지 방법이 모두 같은 유형을 가리켜요! 그래도 설명을 읽어 보고 정말 나와 같은지 스스로 확인해 보세요."
       : "세 가지 결과가 조금 달라요. 괜찮아요! 사람은 여러 모습을 함께 가지고 있어요. 그래서 세 가지를 합쳐 아래에 <b>추천 순위</b>를 만들었어요."}</div>
 
-    <h2>🏅 세 가지를 합친 추천 순위</h2>
+    <h2>세 가지를 합친 추천 순위</h2>
     <p class="sub">검사지 점수에 느낌 찾기와 마음 질문 결과를 더해서, 나와 가까울 것 같은 순서로 정리했어요.<br>순위가 높다고 꼭 내 유형인 것은 아니에요. 하나씩 눌러 설명을 읽어 보세요.</p>
     ${c.rank.slice(0,3).map(rankRow).join("")}
     <details style="margin-top:6px"${c.rank.indexOf(show)>2||c.rank.indexOf(r.chosen)>2?" open":""}><summary class="sub" style="cursor:pointer;padding:6px 0">4위부터 9위까지 보기</summary>
       ${c.rank.slice(3).map((t,i)=>rankRow(t,i+3)).join("")}
     </details>
-    ${readonly?"":`<div class="calm">👉 읽어 보고 <b>가장 나와 비슷하다고 느껴지는 유형</b>에서 <b>'이 유형이 나와 가장 비슷해요'</b>를 눌러 주세요. 나중에 언제든지 다시 고를 수 있어요.</div>`}
+    ${readonly?"":`<div class="calm">읽어 보고 <b>가장 나와 비슷하다고 느껴지는 유형</b>에서 <b>'이 유형이 나와 가장 비슷해요'</b>를 눌러 주세요. 나중에 언제든지 다시 고를 수 있어요.</div>`}
   </div>
 
   <div class="card" id="tdetail">
     <div class="row between">
       <h2 style="margin:0">${T.e} ${show}번 · ${T.nick}</h2>
-      ${readonly?"":r.chosen===show?`<span class="tag" style="background:#e3f6ef;color:#1f8a68;font-size:.9rem">✔ 내가 고른 유형</span>`:`<button class="btn small noprint" data-act="choose" data-v="${show}">이 유형이 나와 가장 비슷해요</button>`}
+      ${readonly?"":r.chosen===show?`<span class="tag" style="background:#e6efe7;color:#2f6d57;font-size:.9rem">✔ 내가 고른 유형</span>`:`<button class="btn small noprint" data-act="choose" data-v="${show}">이 유형이 나와 가장 비슷해요</button>`}
     </div>
     ${typeDetail(show,c)}
     ${show===fin?`
-    <div class="box good"><b>🎯 오늘의 성장 미션</b> <span class="sub">— 하나를 골라 실천해 봐요</span>
+    <div class="box good"><b>오늘의 성장 미션</b> <span class="sub">— 하나를 골라 실천해 봐요</span>
       <ul class="clean">${T.mission.map(x=>`<li>${x}</li>`).join("")}</ul>
-      <label for="pledge"><b>✏️ 오늘부터 내가 노력해 볼 한 가지</b></label>
+      <label for="pledge"><b>오늘부터 내가 노력해 볼 한 가지</b></label>
       <input id="pledge" type="text" maxlength="80" placeholder="예: 친구 이야기를 끝까지 들어 주기" value="${esc(r.pledge||"")}" ${readonly?"readonly":""}>
     </div>`:""}
   </div>
 
   <div class="card">
-    <h2 style="margin-top:0">📊 나의 점수 그래프</h2>
+    <h2 style="margin-top:0">나의 점수 그래프</h2>
     <p class="sub">검사지 60문항으로 계산한 9가지 유형 점수예요. (가장 높은 점수 60점)<br>점수가 높은 유형일수록 그 모습을 많이 가지고 있어요. 낮다고 나쁜 것이 아니에요.</p>
     ${radarSVG(c.q, fin)}
     <div class="grid2">
-      <div><h3>나는 무엇을 먼저 쓸까?</h3>${["A","B","C"].map(k=>hbar(LETTER[k],c.L[k],30,"#7aa6f5")).join("")}</div>
-      <div><h3>나는 어떻게 행동할까?</h3>${["D","E","F"].map(k=>hbar(LETTER[k],c.L[k],30,"#f3a66b")).join("")}</div>
+      <div><h3>나는 무엇을 먼저 쓸까?</h3>${["A","B","C"].map(k=>hbar(LETTER[k],c.L[k],30,"#5f8f7f")).join("")}</div>
+      <div><h3>나는 어떻게 행동할까?</h3>${["D","E","F"].map(k=>hbar(LETTER[k],c.L[k],30,"#c98a5e")).join("")}</div>
     </div>
     <details style="margin-top:10px"><summary class="sub">점수는 이렇게 계산했어요</summary>
       <p class="sub">1~30번에서 고른 답을 A·B·C로, 31~60번에서 고른 답을 D·E·F로 세었어요.<br>
@@ -900,24 +936,24 @@ V.result = () => {
   </div>
 
   <div class="card noprint">
-    <h2 style="margin-top:0">${ka("👫 친구들도 알아봐요","👫 다른 사람도 이해해 봐요")}</h2>
+    <h2 style="margin-top:0">${ka("친구들도 알아봐요","다른 사람도 이해해 봐요")}</h2>
     <p class="sub">9가지 유형은 모두 다르고, 모두 소중해요. ${ka("나와 다른 친구는","나와 다른 사람은")} '틀린' 것이 아니라 '다른' 거예요.</p>
     <div class="row">
       <button class="btn" data-act="types">9가지 유형 모두 보기</button>
       <button class="btn" data-act="friend">${ka("친구 유형 알아보기","다른 사람 유형 알아보기")}</button>
-      ${isClass(r)?`<button class="btn" data-act="classview" data-v="${esc(r.cls||"")}">🏫 우리 반 친구들 보기</button>`:""}
+      ${isClass(r)?`<button class="btn" data-act="classview" data-v="${esc(r.cls||"")}">우리 반 친구들 보기</button>`:""}
     </div>
     <h3>결과 간직하기</h3>
     ${readonly?"":`<p class="sub">다음에 다시 보려면 <b>'내 결과 다시 보기 주소'</b>를 복사해서 메모장이나 카카오톡 '나에게 보내기'에 저장해 두세요. 그 주소를 열면 어느 기기에서든 이 결과가 다시 나와요. ${isClass(r)?"":"같은 기기에서는 첫 화면의 '혼자 검사한 내 결과'에도 남아 있어요. "}주소를 아는 사람은 누구나 볼 수 있으니 다른 사람에게는 보내지 마세요.</p>`}
     <div class="row">
-      <button class="btn ghost small" data-act="png">🖼 결과 사진 저장</button>
-      <button class="btn ghost small" data-act="print">🖨 인쇄하기</button>
-      ${readonly||!myLink(r)?"":`<button class="btn small" data-act="mylink">🔗 내 결과 다시 보기 주소 복사</button>`}
-      ${readonly||!isClass(r)||isOnlineCls(r)?"":`<button class="btn ghost small" data-act="code">📮 선생님께 보낼 결과 코드 복사</button>`}
+      <button class="btn ghost small" data-act="png">결과 사진 저장</button>
+      <button class="btn ghost small" data-act="print">인쇄하기</button>
+      ${readonly||!myLink(r)?"":`<button class="btn small" data-act="mylink">내 결과 다시 보기 주소 복사</button>`}
+      ${readonly||!isClass(r)||isOnlineCls(r)?"":`<button class="btn ghost small" data-act="code">선생님께 보낼 결과 코드 복사</button>`}
     </div>
     <p></p>
     ${readonly?`<button class="btn ghost wide" data-act="goto" data-v="${S.from}">◀ 돌아가기</button>`
-             :`<button class="btn ghost wide" data-act="restart">${ka("처음으로 (다른 친구가 검사하기)","처음으로")}</button>${isClass(r)?"":`<p></p><button class="btn danger wide" data-act="delmine" data-v="${esc(r.id)}">🗑 이 기기에서 내 결과 지우기</button>`}`}
+             :`<button class="btn ghost wide" data-act="restart">${ka("처음으로 (다른 친구가 검사하기)","처음으로")}</button>${isClass(r)?"":`<p></p><button class="btn danger wide" data-act="delmine" data-v="${esc(r.id)}">이 기기에서 내 결과 지우기</button>`}`}
   </div>`;
 };
 function hbar(label,v,max,color){ return `<div class="hbar"><span>${label}</span><span class="track"><i style="width:${(v/max*100).toFixed(0)}%;background:${color}"></i></span><b>${v}</b></div>`; }
@@ -929,12 +965,12 @@ V.types = () => {
     <div class="row between"><h1 style="margin:0">9가지 유형 모두 보기</h1>${backBtn()}</div>
     <p class="sub">유형을 누르면 자세한 설명이 나와요. 좋은 유형, 나쁜 유형은 없어요. 모두 저마다의 멋이 있어요.</p>
     ${Object.keys(CENTER).map(k=>{const C=CENTER[k];return `
-      <h3>${C.e} ${C.name} <span class="sub" style="font-weight:400">— ${C.desc}</span></h3>
+      <h3>${C.name} <span class="sub" style="font-weight:400">— ${C.desc}</span></h3>
       <div class="grid3">${C.types.map(t=>`<button class="tcard" style="${S.openType===t?`border-color:${TYPES[t].color};background:${TYPES[t].color}14`:""}" data-act="opentype" data-v="${t}">
         <div class="e">${TYPES[t].e}</div><b>${t}번 ${TYPES[t].nick}</b><span class="sub">${TYPES[t].one}</span>${t===my?`<br><span class="tag">나의 유형</span>`:""}</button>`).join("")}</div>`}).join("")}
   </div>
   ${S.openType?`<div class="card" id="detail"><h2 style="margin-top:0">${TYPES[S.openType].e} ${S.openType}번 · ${TYPES[S.openType].nick}</h2>${typeDetail(S.openType,null)}
-    <div class="box friend"><b>💬 ${ka("이 친구와 잘 지내려면","이 유형과 잘 지내려면")}</b><ul class="clean"><li><b>좋아하는 말:</b> ${TYPES[S.openType].like}</li><li><b>힘들어하는 것:</b> ${TYPES[S.openType].hard}</li><li><b>이렇게 해 주세요:</b> ${TYPES[S.openType].how}</li></ul></div></div>`:""}`;
+    <div class="box friend"><b>${ka("이 친구와 잘 지내려면","이 유형과 잘 지내려면")}</b><ul class="clean"><li><b>좋아하는 말:</b> ${TYPES[S.openType].like}</li><li><b>힘들어하는 것:</b> ${TYPES[S.openType].hard}</li><li><b>이렇게 해 주세요:</b> ${TYPES[S.openType].how}</li></ul></div></div>`:""}`;
 };
 
 V.friend = () => {
@@ -949,10 +985,10 @@ V.friend = () => {
   ${f?`<div class="card">
     <h2 style="margin-top:0">${TYPES[f].e} ${f}번 · ${TYPES[f].nick}${ka(" 친구는…","")}</h2>
     <p>${TYPES[f].desc}</p>
-    <div class="box good"><b>🌟 ${ka("이 친구의 멋진 점","이 유형의 강점")}</b><ul class="clean">${TYPES[f].good.map(x=>`<li>${x}</li>`).join("")}</ul></div>
-    <div class="box heart"><b>💭 ${ka("이 친구의 마음속","이 유형의 마음속")}</b><ul class="clean"><li><b>바라는 것:</b> ${TYPES[f].want}</li><li><b>${ka("걱정하는 것","두려워하는 것")}:</b> ${TYPES[f].fear}</li><li><b>힘들어하는 것:</b> ${TYPES[f].hard}</li></ul></div>
-    <div class="box friend"><b>💬 이렇게 하면 잘 지낼 수 있어요</b><ul class="clean"><li><b>${ka("이런 말을 좋아해요","듣고 싶어 하는 말")}:</b> ${TYPES[f].like}</li><li>${TYPES[f].how}</li></ul></div>
-    ${my?`<div class="box grow"><b>🧩 나(${my}번 ${TYPES[my].nick})와 ${who}</b><ul class="clean">
+    <div class="box good"><b>${ka("이 친구의 멋진 점","이 유형의 강점")}</b><ul class="clean">${TYPES[f].good.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+    <div class="box heart"><b>${ka("이 친구의 마음속","이 유형의 마음속")}</b><ul class="clean"><li><b>바라는 것:</b> ${TYPES[f].want}</li><li><b>${ka("걱정하는 것","두려워하는 것")}:</b> ${TYPES[f].fear}</li><li><b>힘들어하는 것:</b> ${TYPES[f].hard}</li></ul></div>
+    <div class="box friend"><b>이렇게 하면 잘 지낼 수 있어요</b><ul class="clean"><li><b>${ka("이런 말을 좋아해요","듣고 싶어 하는 말")}:</b> ${TYPES[f].like}</li><li>${TYPES[f].how}</li></ul></div>
+    ${my?`<div class="box grow"><b>나(${my}번 ${TYPES[my].nick})와 ${who}</b><ul class="clean">
       ${my===f?`<li>같은 유형이에요! 서로의 마음을 잘 알 수 있어요. 하지만 같은 유형이어도 사람마다 조금씩 달라요.</li>`
               :`<li>내 마음: <b>“${TYPES[my].want}”</b><br>${who} 마음: <b>“${TYPES[f].want}”</b><br>바라는 것이 달라서 같은 일에도 다르게 행동할 수 있어요.</li>`}
       <li><b>내가 기억할 것:</b> ${TYPES[my].tip}</li>
@@ -972,23 +1008,23 @@ V.classview = () => {
   const o=S.openType;
   return `
   <div class="card">
-    <div class="row between"><h1 style="margin:0">🏫 ${esc(clsName(cls))} 친구들</h1><button class="btn ghost small noprint" data-act="goto" data-v="${back[0]}">${back[1]}</button></div>
+    <div class="row between"><h1 style="margin:0">${esc(clsName(cls))} 친구들</h1><button class="btn ghost small noprint" data-act="goto" data-v="${back[0]}">${back[1]}</button></div>
     ${S.cvOnline && S.cvMsg ? `<div class="note">${esc(S.cvMsg)}</div>` : `
     <p class="sub">반에서 검사한 친구 ${items.length}명의 유형이에요. 이름을 누르면 그 유형의 설명과 잘 지내는 방법이 나와요.</p>
-    <div class="note">🤝 유형은 친구를 더 잘 이해하기 위한 거예요. "넌 ○번이라서 그래" 하고 놀리거나 단정 짓지 않기로 약속해요.</div>
+    <div class="note">유형은 친구를 더 잘 이해하기 위한 거예요. "넌 ○번이라서 그래" 하고 놀리거나 단정 짓지 않기로 약속해요.</div>
     ${Object.keys(CENTER).map(k=>{const C=CENTER[k];return `
-      <h3>${C.e} ${C.name} <span class="sub" style="font-weight:400">${C.types.reduce((n,t)=>n+(group[t]||[]).length,0)}명</span></h3>
+      <h3>${C.name} <span class="sub" style="font-weight:400">${C.types.reduce((n,t)=>n+(group[t]||[]).length,0)}명</span></h3>
       ${C.types.map(t=>`<div class="box" style="border-left:6px solid ${TYPES[t].color}">
         <b>${TYPES[t].e} ${t}번 ${TYPES[t].nick}</b> <span class="sub">${TYPES[t].one} · ${(group[t]||[]).length}명</span>
         <div class="row" style="margin-top:6px">${(group[t]||[]).map(x=>`<button class="chip ${x.me?"sel":""}" style="${x.me?`background:${TYPES[t].color}`:""}" data-act="cvopen" data-v="${t}">${esc(x.name)}${x.me?" (나)":""}</button>`).join("")||`<span class="sub">아직 없어요</span>`}</div>
       </div>`).join("")}`}).join("")}
-    <p></p><div class="row noprint">${S.cvOnline&&S.cvFrom!=="teacher"?`<button class="btn ghost small" data-act="classview" data-v="${esc(cls)}">🔄 새로 고침</button>`:""}<button class="btn ghost small" data-act="print">인쇄하기</button></div>`}
+    <p></p><div class="row noprint">${S.cvOnline&&S.cvFrom!=="teacher"?`<button class="btn ghost small" data-act="classview" data-v="${esc(cls)}">새로 고침</button>`:""}<button class="btn ghost small" data-act="print">인쇄하기</button></div>`}
   </div>
   ${o?`<div class="card" id="detail"><h2 style="margin-top:0">${TYPES[o].e} ${o}번 · ${TYPES[o].nick} 친구는…</h2>
     <p>${TYPES[o].desc}</p>
-    <div class="box good"><b>🌟 이 친구의 멋진 점</b><ul class="clean">${TYPES[o].good.map(x=>`<li>${x}</li>`).join("")}</ul></div>
-    <div class="box heart"><b>💭 이 친구의 마음속</b><ul class="clean"><li><b>바라는 것:</b> ${TYPES[o].want}</li><li><b>걱정하는 것:</b> ${TYPES[o].fear}</li><li><b>힘들어하는 것:</b> ${TYPES[o].hard}</li></ul></div>
-    <div class="box friend"><b>💬 이렇게 하면 잘 지낼 수 있어요</b><ul class="clean"><li><b>이런 말을 좋아해요:</b> ${TYPES[o].like}</li><li>${TYPES[o].how}</li></ul></div></div>`:""}`;
+    <div class="box good"><b>이 친구의 멋진 점</b><ul class="clean">${TYPES[o].good.map(x=>`<li>${x}</li>`).join("")}</ul></div>
+    <div class="box heart"><b>이 친구의 마음속</b><ul class="clean"><li><b>바라는 것:</b> ${TYPES[o].want}</li><li><b>걱정하는 것:</b> ${TYPES[o].fear}</li><li><b>힘들어하는 것:</b> ${TYPES[o].hard}</li></ul></div>
+    <div class="box friend"><b>이렇게 하면 잘 지낼 수 있어요</b><ul class="clean"><li><b>이런 말을 좋아해요:</b> ${TYPES[o].like}</li><li>${TYPES[o].how}</li></ul></div></div>`:""}`;
 };
 
 /* ---------- 선생님 모드 ---------- */
@@ -997,7 +1033,7 @@ function tSummary(list, showCls){
   const group={}; list.forEach(x=>(group[x.t]=group[x.t]||[]).push(x));
   const cc={gut:0,heart:0,head:0}; list.forEach(x=>cc[TYPES[x.t].center]++);
   return `
-    ${list.length?`<div class="grid3">${Object.keys(CENTER).map(k=>`<div class="box center"><b>${CENTER[k].e} ${CENTER[k].name}</b><br><span style="font-size:1.5rem;font-weight:800">${cc[k]}명</span></div>`).join("")}</div>`:""}
+    ${list.length?`<div class="grid3">${Object.keys(CENTER).map(k=>`<div class="box center"><b>${CENTER[k].name}</b><br><span style="font-size:1.5rem;font-weight:800">${cc[k]}명</span></div>`).join("")}</div>`:""}
     ${[1,2,3,4,5,6,7,8,9].map(t=>`
       <div class="box" style="border-left:6px solid ${TYPES[t].color}">
         <b>${TYPES[t].e} ${t}번 ${TYPES[t].nick}</b> <span class="sub">${(group[t]||[]).length}명</span>
@@ -1118,20 +1154,20 @@ V.qr = () => {
     <p style="font-size:1.1rem">QR이 안 되면 첫 화면에서 <b>'반에서 검사하기'</b>를 누르고 반 코드를 적어요.</p>
     <p style="font-size:2.4rem;font-weight:800;letter-spacing:.2em;margin:.1em 0">${c.code}</p>
     <p class="sub" style="word-break:break-all">${esc(url)}</p>
-    <div class="row mid noprint"><button class="btn ghost" data-act="goto" data-v="teacher">◀ 돌아가기</button><button class="btn ghost" data-act="print">🖨 인쇄하기</button><button class="btn ghost" data-act="qrpng">🖼 QR 그림 저장</button></div>
+    <div class="row mid noprint"><button class="btn ghost" data-act="goto" data-v="teacher">◀ 돌아가기</button><button class="btn ghost" data-act="print">인쇄하기</button><button class="btn ghost" data-act="qrpng">QR 그림 저장</button></div>
   </div>`;
 };
 
 V.admin = () => {
   const a=S.adm;
   if(!a) return `<div class="card center"><p>불러오는 중이에요…</p><button class="btn ghost" data-act="goto" data-v="teacher">◀ 내 반으로</button></div>`;
-  const label={ok:"사용 중",pending:"승인 대기",blocked:"사용 중지"}, color={ok:"#1f8a68",pending:"#b9770e",blocked:"#d2504b"};
+  const label={ok:"사용 중",pending:"승인 대기",blocked:"사용 중지"}, color={ok:"#2f6d57",pending:"#a5772a",blocked:"#a8463c"};
   const pend=a.teachers.filter(t=>t.status==="pending");
   const btn=(act,t,text,cls)=>`<button class="btn ${cls||"ghost"} small" data-act="${act}" data-v="${esc(t.id)}">${text}</button>`;
   return `
   <div class="card">
-    <div class="row between"><h1 style="margin:0">🛠 관리자 화면</h1>
-      <div class="row noprint"><button class="btn ghost small" data-act="admin">🔄 새로 고침</button><button class="btn ghost small" data-act="goto" data-v="teacher">◀ 내 반으로</button></div></div>
+    <div class="row between"><h1 style="margin:0">관리자 화면</h1>
+      <div class="row noprint"><button class="btn ghost small" data-act="admin">새로 고침</button><button class="btn ghost small" data-act="goto" data-v="teacher">◀ 내 반으로</button></div></div>
     <p class="sub">가입한 선생님과 사용 현황을 관리해요. 다른 선생님 반의 학생 이름과 검사 결과는 여기에 나오지 않아요.</p>
     <div class="grid3">
       <div class="box center"><b>선생님</b><br><span style="font-size:1.5rem;font-weight:800">${a.totals.teachers}명</span></div>
@@ -1144,13 +1180,13 @@ V.admin = () => {
     </div>
     <p class="sub">${a.approval?"새로 가입한 선생님은 여기서 승인해야 로그인할 수 있어요.":"지금은 누구나 가입하면 바로 반을 만들 수 있어요. 모르는 사람이 가입하는 것이 걱정되면 승인 방식으로 바꾸세요."}</p>
   </div>
-  ${S.atemp?`<div class="card" style="border:3px solid #bfe8d9">
-    <b>🔑 ${esc(S.atemp.name)} 선생님(아이디 ${esc(S.atemp.loginId)})의 임시 비밀번호</b>
+  ${S.atemp?`<div class="card" style="border:3px solid #c9dccd">
+    <b>${esc(S.atemp.name)} 선생님(아이디 ${esc(S.atemp.loginId)})의 임시 비밀번호</b>
     <p style="font-size:1.6rem;font-weight:800;letter-spacing:.12em;margin:.3em 0">${esc(S.atemp.pw)}</p>
     <p class="sub">이 화면을 벗어나면 다시 볼 수 없어요. 선생님께 전해 주고, 로그인한 뒤 '비밀번호 바꾸기'로 바꾸도록 안내해 주세요.</p>
     <button class="btn ghost small noprint" data-act="atempclose">확인했어요</button></div>`:""}
-  ${pend.length?`<div class="card" style="border:3px solid #f2d48a">
-    <h2 style="margin-top:0">⏳ 승인을 기다리는 선생님 ${pend.length}명</h2>
+  ${pend.length?`<div class="card" style="border:3px solid #e3cf9f">
+    <h2 style="margin-top:0">승인을 기다리는 선생님 ${pend.length}명</h2>
     ${pend.map(t=>`<div class="row between box"><div><b>${esc(t.name)}</b> <span class="sub">아이디 ${esc(t.loginId)} · ${esc(t.created)} 신청</span></div>
       <div class="row noprint">${btn("aok",t,"승인","")}${btn("adel",t,"거절(삭제)","danger")}</div></div>`).join("")}
   </div>`:""}
@@ -1161,7 +1197,7 @@ V.admin = () => {
       ${a.teachers.map(t=>`<tr>
         <td><b>${esc(t.name)}</b>${t.admin?` <span class="tag">관리자</span>`:""}${t.me?` <span class="tag">나</span>`:""}</td>
         <td>${esc(t.loginId)}</td><td class="sub">${esc(t.created)}</td>
-        <td><b style="color:${color[t.status]||"#69707d"}">${label[t.status]||esc(t.status)}</b></td>
+        <td><b style="color:${color[t.status]||"#756b62"}">${label[t.status]||esc(t.status)}</b></td>
         <td>${t.classes}</td><td>${t.results}</td>
         <td class="noprint">${t.me?`<span class="sub">내 계정</span>`:`<div class="row">
           ${t.status==="pending"?btn("aok",t,"승인",""):t.status==="blocked"?btn("aok",t,"다시 사용"):btn("ablock",t,"사용 중지")}
@@ -1178,7 +1214,7 @@ function teacherOnline(){
     const up = S.tform==="signup";
     return `
   <div class="card">
-    <div class="center"><div class="big-emoji">👩‍🏫</div><h1>선생님 모드</h1>
+    <div class="center"><div class="big-emoji"></div><h1>선생님 모드</h1>
     <p class="sub">${up?"가입하면 내 반을 만들고, 학생들의 검사 결과를 반별로 모아 볼 수 있어요.":"로그인하면 내 반과 학생 결과를 볼 수 있어요."}</p></div>
     <div class="row mid" style="margin-bottom:12px">
       <button class="chip ${up?"":"sel"}" style="${up?"":"background:var(--main)"}" data-act="tform" data-v="login">로그인</button>
@@ -1199,14 +1235,14 @@ function teacherOnline(){
   const link = /^https?:/.test(location.protocol) ? location.origin+location.pathname+"?c=" : "";
   return `
   <div class="card">
-    <div class="row between"><h1 style="margin:0">👩‍🏫 ${esc(S.tname)} 선생님</h1>
-      <div class="row noprint">${S.tadmin?`<button class="btn small" data-act="admin">🛠 관리자 화면</button>`:""}<button class="btn ghost small" data-act="tpwform">비밀번호 바꾸기</button><button class="btn ghost small" data-act="tout">로그아웃</button></div></div>
+    <div class="row between"><h1 style="margin:0">${esc(S.tname)} 선생님</h1>
+      <div class="row noprint">${S.tadmin?`<button class="btn small" data-act="admin">관리자 화면</button>`:""}<button class="btn ghost small" data-act="tpwform">비밀번호 바꾸기</button><button class="btn ghost small" data-act="tout">로그아웃</button></div></div>
     ${S.tpwform?`<div class="box noprint"><label for="tnp"><b>새 비밀번호</b> <span class="sub">6자 이상</span></label>
       <div class="row" style="flex-wrap:nowrap;margin-top:6px"><input id="tnp" type="password" maxlength="50" autocomplete="new-password"><button class="btn" style="flex:none" data-act="tpwsave">바꾸기</button></div></div>`:""}
     <h2>내 반</h2>
-    ${S.tclasses.length?S.tclasses.map(c=>`<div class="row between box" style="${c.code===S.tcls?"outline:3px solid #b9cdfa":""}">
+    ${S.tclasses.length?S.tclasses.map(c=>`<div class="row between box" style="${c.code===S.tcls?"outline:3px solid #b9cfc3":""}">
       <div><b>${esc(c.name)}</b> <span class="sub">${c.count}명 검사</span><br>반 코드 <b style="font-size:1.25rem;letter-spacing:.15em">${c.code}</b></div>
-      <button class="btn small noprint" data-act="topen" data-v="${c.code}">${c.code===S.tcls?"🔄 새로 고침":"열기"}</button></div>`).join("")
+      <button class="btn small noprint" data-act="topen" data-v="${c.code}">${c.code===S.tcls?"새로 고침":"열기"}</button></div>`).join("")
       :`<p class="sub">아직 만든 반이 없어요. 아래에서 반을 만들어 보세요.</p>`}
     <div class="row noprint" style="margin-top:12px;flex-wrap:nowrap">
       <input id="tcn" type="text" maxlength="20" placeholder="반 이름 (예: 2026년도 5학년 4반)" autocomplete="off">
@@ -1215,7 +1251,7 @@ function teacherOnline(){
   </div>
   ${cur?`<div class="card">
     <h2 style="margin-top:0">${esc(cur.name)} · ${list.length}명</h2>
-    <div class="calm noprint">📣 학생들에게 이렇게 알려 주세요<br>
+    <div class="calm noprint">학생들에게 이렇게 알려 주세요<br>
       첫 화면에서 <b>'반에서 검사하기'</b>를 누르고 반 코드 <b style="font-size:1.3rem;letter-spacing:.15em">${cur.code}</b> 를 적어요.
       <br>이름은 <b>번호와 이름 두 글자</b>(예: 1번 차신혜 → 1차신), 비밀번호는 <b>숫자 4자리</b>를 스스로 정해요. 같은 이름과 비밀번호로 다시 들어오면 자기 결과를 볼 수 있어요.
       <br><span class="sub">비밀번호를 잊은 학생은 아래 표에서 '비밀번호 초기화'를 눌러 주세요. 그다음에 학생이 넣는 비밀번호로 새로 정해져요.</span>
@@ -1224,9 +1260,9 @@ function teacherOnline(){
         <div style="background:#fff;padding:8px;border-radius:12px;line-height:0">${qrSVG(link+cur.code,170)}</div>
         <div style="flex:1;min-width:200px"><span style="word-break:break-all">${esc(link+cur.code)}</span>
           <div class="row" style="margin-top:10px">
-            <button class="btn small" data-act="qrbig">🔍 QR 크게 보기</button>
-            <button class="btn ghost small" data-act="qrpng">🖼 QR 그림 저장</button>
-            <button class="btn ghost small" data-act="linkcopy">📋 주소 복사</button>
+            <button class="btn small" data-act="qrbig">QR 크게 보기</button>
+            <button class="btn ghost small" data-act="qrpng">QR 그림 저장</button>
+            <button class="btn ghost small" data-act="linkcopy">주소 복사</button>
           </div></div>
       </div>`:""}</div>
     <div class="row noprint" style="margin-bottom:10px">
@@ -1236,10 +1272,10 @@ function teacherOnline(){
     </div>
     ${tSummary(list,false)}
     <p></p><div class="row noprint">
-      <button class="btn" data-act="classview" data-v="${cur.code}">📺 '${esc(cur.name)} 친구들' 화면 열기</button>
+      <button class="btn" data-act="classview" data-v="${cur.code}">'${esc(cur.name)} 친구들' 화면 열기</button>
     </div>
   </div>
-  ${tTable(list, cur.name, `<button class="btn ghost small" data-act="backup">💾 백업 파일 저장</button>`)}
+  ${tTable(list, cur.name, `<button class="btn ghost small" data-act="backup">백업 파일 저장</button>`)}
   <div class="card noprint">
     <h2 style="margin-top:0">반 삭제</h2>
     <p class="sub">반을 삭제하면 이 반 학생들의 결과도 서버에서 모두 지워져요. 학년이 끝나면 삭제해 주세요.</p>
@@ -1250,7 +1286,7 @@ function teacherOnline(){
 function teacherLocal(){
   if(!S.teacher) return `
   <div class="card center">
-    <div class="big-emoji">👩‍🏫</div><h1>선생님 모드</h1>
+    <div class="big-emoji"></div><h1>선생님 모드</h1>
     <p class="sub">비밀번호를 입력해 주세요.</p>
     <input id="pw" type="password" inputmode="numeric" autocomplete="off" style="max-width:240px;text-align:center">
     <p></p><div class="row mid"><button class="btn ghost" data-act="home">처음으로</button><button class="btn" data-act="pw">확인</button></div>
@@ -1261,7 +1297,7 @@ function teacherLocal(){
   const title = S.tcls==="*" ? "전체" : clsName(S.tcls);
   return `
   <div class="card">
-    <div class="row between"><h1 style="margin:0">👩‍🏫 반별 결과</h1><button class="btn ghost small noprint" data-act="tout">나가기</button></div>
+    <div class="row between"><h1 style="margin:0">반별 결과</h1><button class="btn ghost small noprint" data-act="tout">나가기</button></div>
     <p class="sub">'반에서 검사하기'로 한 결과만 모여요. (이 기기에서 한 검사 + 결과 코드나 백업 파일로 추가한 결과)<br>'혼자 검사하기' 결과는 여기에 나오지 않아요.</p>
     <div class="row noprint">
       <button class="chip ${S.tcls==="*"?"sel":""}" style="${S.tcls==="*"?"background:var(--main)":""}" data-act="tcls" data-v="*">전체 ${all.length}명</button>
@@ -1269,15 +1305,15 @@ function teacherLocal(){
     </div>
     <h2>${esc(title)} · ${list.length}명</h2>
     ${tSummary(list, S.tcls==="*"&&classes.length>1)}
-    ${S.tcls!=="*"?`<p></p><button class="btn noprint" data-act="classview" data-v="${esc(S.tcls)}">📺 학생들에게 보여 줄 '${esc(title)} 친구들' 화면 열기</button>`:""}
+    ${S.tcls!=="*"?`<p></p><button class="btn noprint" data-act="classview" data-v="${esc(S.tcls)}">학생들에게 보여 줄 '${esc(title)} 친구들' 화면 열기</button>`:""}
   </div>
   ${tTable(list, title, `<button class="btn danger small" data-act="tclear">${esc(title)} 결과 모두 삭제</button>`)}
   <div class="card noprint">
     <h2 style="margin-top:0">백업과 불러오기</h2>
     <p class="sub">${esc(title)} 결과를 백업 파일로 저장해 두었다가, 이 컴퓨터나 다른 컴퓨터의 선생님 모드에서 다시 불러올 수 있어요. 불러오면 지금 있는 결과에 합쳐지고, 같은 학생의 같은 검사는 한 번만 들어가요.</p>
     <div class="row">
-      <button class="btn ghost" data-act="backup" ${list.length?"":"disabled"}>💾 ${esc(title)} 백업 파일 저장</button>
-      <button class="btn ghost" data-act="restore">📂 백업 파일 불러오기</button>
+      <button class="btn ghost" data-act="backup" ${list.length?"":"disabled"}>${esc(title)} 백업 파일 저장</button>
+      <button class="btn ghost" data-act="restore">백업 파일 불러오기</button>
     </div>
     <input id="bk" type="file" accept=".json,application/json" multiple hidden>
   </div>
@@ -1432,9 +1468,9 @@ const byNo = (a,b) => (parseInt(a,10)||999)-(parseInt(b,10)||999) || String(a).l
 const isOnlineCls = r => ONLINE && isClass(r) && isCode(r.cls) && !r.imported;
 function syncHTML(r){
   if(S.from || !isOnlineCls(r)) return "";
-  if(r.synced===true) return "<br>✅ 선생님께 결과를 보냈어요.";
-  if(r.synced===false) return `<br>⚠️ 결과를 보내지 못했어요. (${esc(r.syncErr||"")}) <button class="btn small" data-act="resend">다시 보내기</button>`;
-  return "<br>⏳ 선생님께 결과를 보내는 중…";
+  if(r.synced===true) return "<br>선생님께 결과를 보냈어요.";
+  if(r.synced===false) return `<br>결과를 보내지 못했어요. (${esc(r.syncErr||"")}) <button class="btn small" data-act="resend">다시 보내기</button>`;
+  return "<br>선생님께 결과를 보내는 중…";
 }
 async function pushResult(rec){
   if(!isOnlineCls(rec)) return;
@@ -1587,23 +1623,23 @@ function savePNG(r){
   const wing=wingOf(t,c.q);
   const secs=[
     {bg:"#ffffff",title:"",items:[T.desc]},
-    {bg:"#eaf7f1",title:"🌟 나의 강점",items:T.good.map(x=>"• "+x)},
-    {bg:"#fff4e8",title:"🌱 이렇게 하면 더 멋져져요",items:T.grow.map(x=>"• "+x)},
-    {bg:"#fdeef3",title:"💭 내 마음속 이야기",items:["• 바라는 것: "+T.want,"• 걱정되는 것: "+T.fear]},
-    {bg:"#f3f5fb",title:"🔄 상황에 따라 달라지는 나",items:[
+    {bg:"#f1f5f0",title:"나의 강점",items:T.good.map(x=>"• "+x)},
+    {bg:"#faf3e6",title:"이렇게 하면 더 멋져져요",items:T.grow.map(x=>"• "+x)},
+    {bg:"#f8eeea",title:"내 마음속 이야기",items:["• 바라는 것: "+T.want,"• 걱정되는 것: "+T.fear]},
+    {bg:"#f4f0e8",title:"상황에 따라 달라지는 나",items:[
       `• 많이 힘들고 지칠 때: ${STRESS[t]}번 유형의 아쉬운 모습처럼 ${TYPES[STRESS[t]].low}`,
       `• 마음이 편안하고 자라날 때: ${GROWTH[t]}번 유형의 좋은 모습처럼 ${TYPES[GROWTH[t]].high}`,
       wing?`• 나의 날개: 옆자리 ${wing}번 ${TYPES[wing].nick}의 모습도 조금 가지고 있어요.`:""].filter(Boolean)},
-    {bg:"#eef2ff",title:"🤝 "+ka("친구들과 잘 지내는 팁","관계를 위한 팁"),items:[T.tip,"• 듣고 싶은 말: "+T.like]},
-    {bg:"#eaf7f1",title:"🎯 성장 미션",items:T.mission.map(x=>"• "+x).concat(r.pledge?["✏️ 나의 다짐: "+r.pledge]:[])},
-    {bg:"#ffffff",title:"🏅 세 가지를 합친 추천 순위",items:c.rank.slice(0,3).map((x,i)=>`${i+1}위   ${x}번 ${TYPES[x].nick} — ${TYPES[x].one}`)}
+    {bg:"#eff2f4",title:""+ka("친구들과 잘 지내는 팁","관계를 위한 팁"),items:[T.tip,"• 듣고 싶은 말: "+T.like]},
+    {bg:"#f1f5f0",title:"성장 미션",items:T.mission.map(x=>"• "+x).concat(r.pledge?["나의 다짐: "+r.pledge]:[])},
+    {bg:"#ffffff",title:"세 가지를 합친 추천 순위",items:c.rank.slice(0,3).map((x,i)=>`${i+1}위   ${x}번 ${TYPES[x].nick} — ${TYPES[x].one}`)}
   ].map(s=>{ const L=s.items.map(it=>split(it,FS,400,W-2*P-2*IN)); return {...s,L,h:28+(s.title?48:0)+L.reduce((n,l)=>n+l.length*LH+8,0)+14}; });
   const foot=split(ka("이 결과는 정답이 아니라 출발점이에요. 호기심을 가지고 평소의 나를 살펴보며 나를 알아가는 여행을 계속해요.",
                       "이 결과는 정답이 아니라 출발점이에요. 호기심을 가지고 일상의 나를 살펴보며 나를 알아가는 여행을 계속해 보세요."),23,600,W-2*P-20);
   const HERO=390, RADAR=430;
   const H=P+HERO+20+RADAR+20+secs.reduce((n,s)=>n+s.h+16,0)+foot.length*32+70;
   cv.width=W; cv.height=H;
-  g.fillStyle="#fdf6ec"; g.fillRect(0,0,W,H);
+  g.fillStyle="#f5f0e8"; g.fillRect(0,0,W,H);
   // 머리 부분
   g.fillStyle=T.color; rr(g,P,P,W-2*P,HERO,36); g.fill();
   g.fillStyle="#fff"; g.textAlign="center";
@@ -1611,32 +1647,32 @@ function savePNG(r){
   font(120); g.fillText(T.e,W/2,235);
   font(54,800); g.fillText(`${t}번 · ${T.nick}`,W/2,320);
   font(28,500); g.fillText(T.one,W/2,366);
-  font(22,700); g.fillText(r.chosen?"✔ 내가 고른 나의 유형":"🏅 추천 1순위 (아직 고르지 않았어요)",W/2,408);
+  font(22,700); g.fillText(r.chosen?"✔ 내가 고른 나의 유형":"추천 1순위 (아직 고르지 않았어요)",W/2,408);
   // 점수 그래프
   let y=P+HERO+20;
   g.fillStyle="#fff"; rr(g,P,y,W-2*P,RADAR,30); g.fill();
   const cx=W/2, cy=y+220, R=140, max=Math.max(40,...Object.values(c.q));
   const pt=(i,rad)=>{ const a=-Math.PI/2+i*2*Math.PI/9; return [cx+rad*Math.cos(a), cy+rad*Math.sin(a)]; };
-  g.strokeStyle="#dfe4ee"; g.lineWidth=1.5;
+  g.strokeStyle="#ded6c8"; g.lineWidth=1.5;
   [.25,.5,.75,1].forEach(k=>{ g.beginPath(); ORDER.forEach((_,i)=>{ const p=pt(i,R*k); i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]); }); g.closePath(); g.stroke(); });
   g.beginPath(); ORDER.forEach((tt,i)=>{ const p=pt(i,R*c.q[tt]/max); i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]); }); g.closePath();
   g.fillStyle=T.color+"44"; g.fill(); g.strokeStyle=T.color; g.lineWidth=4; g.stroke();
-  ORDER.forEach((tt,i)=>{ const p=pt(i,R+42); g.fillStyle="#2f3542"; font(24,tt===t?800:600); g.fillText(`${tt}번`,p[0],p[1]); g.fillStyle="#69707d"; font(20); g.fillText(`${c.q[tt]}점`,p[0],p[1]+24); });
+  ORDER.forEach((tt,i)=>{ const p=pt(i,R+42); g.fillStyle="#2b2724"; font(24,tt===t?800:600); g.fillText(`${tt}번`,p[0],p[1]); g.fillStyle="#756b62"; font(20); g.fillText(`${c.q[tt]}점`,p[0],p[1]+24); });
   y+=RADAR+20;
   // 설명 칸들
   g.textAlign="left";
   secs.forEach(s=>{
     g.fillStyle=s.bg; rr(g,P,y,W-2*P,s.h,26); g.fill();
     let ty=y+28+26;
-    if(s.title){ g.fillStyle="#2f3542"; font(29,800); g.fillText(s.title,P+IN,ty); ty+=48; }
-    g.fillStyle="#2f3542"; font(FS,400);
-    s.L.forEach(l=>{ l.forEach((line,i)=>{ g.fillText(i&&/^[•✏]/.test(l[0])?"   "+line:line,P+IN,ty); ty+=LH; }); ty+=8; });
+    if(s.title){ g.fillStyle="#2b2724"; font(29,800); g.fillText(s.title,P+IN,ty); ty+=48; }
+    g.fillStyle="#2b2724"; font(FS,400);
+    s.L.forEach(l=>{ l.forEach((line,i)=>{ g.fillText(i&&/^[•]/.test(l[0])?"   "+line:line,P+IN,ty); ty+=LH; }); ty+=8; });
     y+=s.h+16;
   });
   // 맺음말
   g.textAlign="center"; g.fillStyle=T.color; font(23,600);
   y+=22; foot.forEach(line=>{ g.fillText(line,W/2,y); y+=32; });
-  g.fillStyle="#9aa1ad"; font(20); g.fillText(`나를 찾는 에니어그램 여행 · ${r.date}`,W/2,H-24);
+  g.fillStyle="#a39a8f"; font(20); g.fillText(`나를 찾는 에니어그램 여행 · ${r.date}`,W/2,H-24);
   cv.toBlob(b=>download(b,`에니어그램_${r.name}.png`),"image/png");
 }
 function rr(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
