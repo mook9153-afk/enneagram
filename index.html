@@ -666,7 +666,7 @@ const URLC = (()=>{ try{ return (new URLSearchParams(location.search).get("c")||
 const S = fresh();
 function fresh(){ return {view:"home",name:"",feel:{k:null,s:null,r:null},ans:Array(60).fill(0),qi:0,deep:[0,0,0,0],di:0,
   deepOrder:DEEP.map(()=>shuffle([1,2,3,4,5,6,7,8,9])),rec:null,show:0,openType:0,friend:0,teacher:false,from:null,mode:ONLINE&&URLC?"class":null,cls:"",tcls:ONLINE?"":"*",vcls:"",cvFrom:null,
-  aud:"kid",ccode:URLC,tok:null,tname:"",tclasses:[],tlist:[],tform:"login",cvOnline:false,cvList:null,cvMsg:"",tadmin:false,tnote:"",tpwform:false,adm:null,atemp:null,found:null,retake:false,reuseId:null,pin:"",ttype:0,ttypeEdit:false,forTeacher:false,tshow:false,cvTeacher:null,cvTab:"friends",gv:null,gvErr:"",gpick:0,gtext:"",gedit:false,cvGuessTab:false}; }
+  aud:"kid",ccode:URLC,tok:null,tname:"",tclasses:[],tlist:[],tform:"login",cvOnline:false,cvList:null,cvMsg:"",tadmin:false,tnote:"",tpwform:false,adm:null,atemp:null,found:null,retake:false,reuseId:null,pin:"",ttype:0,ttypeEdit:false,forTeacher:false,tshow:false,cvTeacher:null,cvTab:"friends",gv:null,gvErr:"",gpick:0,gtext:"",gedit:false,cvGuessTab:false,cvMindTab:false,mv:null,mvErr:"",md:{},mRound:0,mSub:"all",muSel:"",muShow:{near:1,far:1,want:0}}; }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const $app = document.getElementById("app");
@@ -1055,6 +1055,7 @@ function backBtn(){ return S.rec?`<button class="btn ghost small noprint" data-a
 
 V.classview = () => {
   if(S.cvOnline && S.cvTab==="guess") return guessPage();
+  if(S.cvOnline && S.cvTab==="mind") return mindPage();
   const cls=S.vcls;
   const items = S.cvOnline ? (S.cvList||[]).map(x=>({name:x.name,t:x.t,me:!S.from&&S.rec&&S.rec.name===x.name&&S.rec.cls===cls}))
     : classRecords().filter(r=>(r.cls||"")===cls).map(r=>({name:r.name,t:r.chosen||calc(r).top,me:!S.from&&S.rec&&S.rec.id===r.id}));
@@ -1287,9 +1288,13 @@ async function applyPendType(){
 
 /* ---------- 우리 반 탭: 선생님은 어떤 유형일까? ---------- */
 function cvTabs(){
-  if(!S.cvOnline || !(cvIsTeacher() || S.cvGuessTab)) return "";
-  const tab=(v,label)=>`<span class="${(S.cvTab==="guess")===(v==="guess")?"on":""}" data-act="cvtab" data-v="${v}" style="cursor:pointer;font-size:.95rem">${label}</span>`;
-  return `<div class="steps noprint" style="margin:10px 0 16px">${tab("friends","친구들 유형")}${tab("guess","선생님은 어떤 유형일까?")}</div>`;
+  if(!S.cvOnline) return "";
+  const T=cvIsTeacher(), tabs=[["friends","친구들 유형"]];
+  if(T||S.cvGuessTab) tabs.push(["guess","선생님은 어떤 유형일까?"]);
+  if(T||S.cvMindTab) tabs.push(["mind","마음거리"]);
+  if(tabs.length<2) return "";
+  const cur=S.cvTab||"friends";
+  return `<div class="steps noprint" style="margin:10px 0 16px">${tabs.map(([v,l])=>`<span class="${cur===v?"on":""}" data-act="cvtab" data-v="${v}" style="cursor:pointer;font-size:.95rem">${l}</span>`).join("")}</div>`;
 }
 const cvIsTeacher = () => !!(S.tok && S.tcls===S.vcls);
 const cvMe = () => !cvIsTeacher() && S.rec && !S.from && isClass(S.rec) && S.rec.cls===S.vcls ? S.rec : null;
@@ -1356,6 +1361,192 @@ function guessPage(){
   const cls=S.vcls, g=S.gv;
   const back = S.cvFrom==="teacher"?["teacher","◀ 선생님 모드로"]:S.cvFrom==="result"?["result","◀ 결과로"]:["home","◀ 처음으로"];
   const body = S.gvErr ? `<div class="note">${esc(S.gvErr)}</div>` : !g ? `<p class="sub">불러오는 중이에요…</p>` : cvIsTeacher() ? teacherGuess(g) : studentGuess(g,cvMe());
+  return `
+  <div class="card">
+    <div class="row between"><h1 style="margin:0">${esc(clsName(cls))}</h1><button class="btn ghost small noprint" data-act="goto" data-v="${back[0]}">${back[1]}</button></div>
+    ${cvTabs()}
+    ${body}
+  </div>`;
+}
+
+/* ---------- 우리 반 탭: 마음거리 검사 (결과는 선생님만 본다) ---------- */
+const MDIST = [[1,"가까운 거리","#5f8f7f"],[2,"보통 거리","#8a8178"],[3,"아직 어색한 거리","#c98a5e"]];
+function loadMind(){
+  S.mv=null; S.mvErr="";
+  const me=cvMe();
+  const p = cvIsTeacher() ? api("mindList",{token:S.tok,code:S.vcls})
+          : me ? api("mindRoster",{code:S.vcls,name:me.name,pin:me.pin||""}) : Promise.resolve({noMe:true});
+  return p.then(j=>{ S.mv=j; S.md={}; if(j.mine) Object.keys(j.mine).forEach(n=>{ S.md[n]={d:+j.mine[n].d||2,w:j.mine[n].w?1:0,why:j.mine[n].why||""}; }); },e=>{ S.mvErr=e.message; })
+          .then(()=>{ if(S.view==="classview") render(); });
+}
+function studentMind(mv){
+  let s=`<h2>마음거리 검사${mv.round>1?` <span class="tag">${mv.round}회차</span>`:""}</h2>
+    <p>우리 반 친구들과 나 사이의 <b>마음의 거리</b>를 알려 주세요.<br>지금 느끼는 그대로 고르면 돼요. 정답은 없어요.</p>
+    <div class="calm"><b>이 검사는 선생님만 볼 수 있어요.</b><br>내가 고른 것은 친구들에게 보이지 않아요. 선생님이 우리 반 친구들이 더 잘 지내도록 돕는 데에만 써요.</div>`;
+  if(mv.noMe) return s+`<div class="note">참여하려면 내 검사 결과를 먼저 열어야 해요. 첫 화면에서 '반에서 검사하기'를 누르고 <b>같은 반 코드, 이름, 비밀번호</b>로 들어온 뒤 '우리 반 친구들 보기'를 눌러 주세요.</div>`;
+  if(!mv.names.length) return s+`<div class="note">아직 에니어그램 검사를 마친 친구가 없어요. 친구들이 검사를 마치면 여기에 이름이 나와요.</div>`;
+  const vals=mv.names.map(n=>S.md[n]||{d:2,w:0,why:""});
+  const cnt=d=>vals.filter(v=>v.d===d).length, wants=vals.filter(v=>v.w).length;
+  s+=`<div class="note"><b>고르는 방법</b><br>
+      친구마다 <b>가까운 거리 / 보통 거리 / 아직 어색한 거리</b> 가운데 하나를 골라요. 고르지 않으면 '보통 거리'로 들어가요.<br>
+      앞으로 더 <b>친해지고 싶은 친구</b>가 있으면 별표를 눌러요. 3명까지 고를 수 있어요.<br>
+      '아직 어색한 거리'는 싫다는 뜻이 아니에요. 아직 잘 모르거나 조금 불편한 마음이 있다는 뜻이에요.</div>
+    ${mv.mine?`<div class="box good"><b>이미 낸 적이 있어요.</b> 아래에서 고친 뒤 다시 보내면 바뀌어요.</div>`:""}
+    ${mv.names.map(n=>{ const v=S.md[n]||{d:2,w:0,why:""}; return `<div class="box" style="background:#fff">
+      <div class="row between"><b style="font-size:1.08rem">${esc(n)}</b>
+        <button class="chip ${v.w?"sel":""}" style="${v.w?"background:var(--accent)":""}" data-act="mwant" data-v="${esc(n)}">${v.w?"★":"☆"} 친해지고 싶어요</button></div>
+      <div class="row" style="margin-top:10px">${MDIST.map(([d,label,col])=>`<button class="chip ${v.d===d?"sel":""}" style="${v.d===d?`background:${col}`:""}" data-act="mdist" data-v="${d}|${esc(n)}">${label}</button>`).join("")}</div>
+      ${v.d!==2?`<input type="text" maxlength="100" data-mwhy="${esc(n)}" placeholder="까닭을 적어도 좋아요 (안 써도 돼요)" value="${esc(v.why||"")}" style="margin-top:10px;font-size:.95rem">`:""}
+    </div>`; }).join("")}
+    <p class="sub">가까운 거리 ${cnt(1)}명 · 보통 거리 ${cnt(2)}명 · 아직 어색한 거리 ${cnt(3)}명 · 친해지고 싶은 친구 ${wants}명</p>
+    <button class="btn wide" data-act="msend">선생님께 보내기</button>`;
+  return s;
+}
+// 선생님용 계산: 한 회차의 응답으로, 누가 누구를 어떻게 골랐는지와 살펴볼 관계를 뽑는다
+function mindStats(mv, round){
+  const list=(mv.rounds&&mv.rounds[round])||(round===mv.round?mv.list:[])||[];
+  const names=mv.roster.slice().sort(byNo), resp={};
+  list.forEach(x=>{ if(names.includes(x.name)) resp[x.name]=x.data||{}; });
+  const get=(a,b)=>{ if(!(a in resp)) return null; const v=resp[a][b]; return {d:v?(+v.d||2):2,w:!!(v&&v.w),why:(v&&v.why)||""}; };
+  const rows=names.map(b=>{ let near=0,far=0,want=0,gNear=0,gFar=0;
+    names.forEach(a=>{ if(a===b) return; const v=get(a,b); if(v){ if(v.d===1) near++; if(v.d===3) far++; if(v.w) want++; }
+      const g=get(b,a); if(g){ if(g.d===1) gNear++; if(g.d===3) gFar++; } });
+    return {name:b,done:b in resp,near,far,want,gNear,gFar,score:near*2+want-far}; });
+  const mutual=[],mutualFar=[],oneFar=[],wantOne=[],reasons=[];
+  names.forEach((a,i)=>names.forEach((b,j)=>{ if(a===b) return; const x=get(a,b), y=get(b,a); if(!x) return;
+    if(x.why) reasons.push({a,b,d:x.d,why:x.why});
+    if(i<j && y && x.d===1 && y.d===1) mutual.push([a,b]);
+    if(i<j && y && x.d===3 && y.d===3) mutualFar.push([a,b]);
+    if(x.d===3 && !(y && y.d===3)) oneFar.push([a,b]);
+    if(x.w && y && y.d!==1) wantOne.push([a,b]); }));
+  const count=Object.keys(resp).length, sum=k=>rows.reduce((n,r)=>n+r[k],0);
+  return {names,resp,get,rows,mutual,mutualFar,oneFar,wantOne,reasons,count,
+    total:{near:sum("near"),far:sum("far"),want:sum("want"),score:sum("score")},
+    todo:names.filter(n=>!(n in resp)), lonely:rows.filter(r=>r.near===0 && count>0).map(r=>r.name)};
+}
+// 유니버스 보기: 학생을 둥글게 놓고 관계를 선으로 잇는다
+function mindUniverse(st){
+  const N=st.names.length, R=Math.max(150, Math.min(260, 60+N*9)), W=2*R+240, cx=W/2, cy=W/2, sel=S.muSel, show=S.muShow;
+  const pos={}; st.names.forEach((n,i)=>{ const a=-Math.PI/2+i*2*Math.PI/Math.max(1,N); pos[n]={x:cx+R*Math.cos(a),y:cy+R*Math.sin(a),a}; });
+  const rad=n=>{ const r=st.rows.find(x=>x.name===n); return Math.min(22, 9+(r?r.near:0)*2.2); };
+  const seg=(a,b,off)=>{ const p=pos[a], q=pos[b], dx=q.x-p.x, dy=q.y-p.y, L=Math.hypot(dx,dy)||1, ux=dx/L, uy=dy/L, ox=-uy*off, oy=ux*off, ra=rad(a)+2, rb=rad(b)+(off?7:2);
+    return `x1="${(p.x+ux*ra+ox).toFixed(1)}" y1="${(p.y+uy*ra+oy).toFixed(1)}" x2="${(q.x-ux*rb+ox).toFixed(1)}" y2="${(q.y-uy*rb+oy).toFixed(1)}"`; };
+  const dim=(a,b)=>sel && a!==sel && b!==sel ? ' opacity=".07"' : "";
+  let lines="";
+  st.names.forEach((a,i)=>st.names.forEach((b,j)=>{ if(a===b) return; const x=st.get(a,b), y=st.get(b,a); if(!x) return;
+    if(show.near && x.d===1){ if(y && y.d===1){ if(i<j) lines+=`<line ${seg(a,b,0)} stroke="#2f5d50" stroke-width="3.2"${dim(a,b)}/>`; }
+      else lines+=`<line ${seg(a,b,4)} stroke="#8fb3a3" stroke-width="1.6" marker-end="url(#mk-n)"${dim(a,b)}/>`; }
+    if(show.far && x.d===3){ if(y && y.d===3){ if(i<j) lines+=`<line ${seg(a,b,0)} stroke="#b9553f" stroke-width="3" stroke-dasharray="7 5"${dim(a,b)}/>`; }
+      else lines+=`<line ${seg(a,b,4)} stroke="#cf8a78" stroke-width="1.6" stroke-dasharray="6 4" marker-end="url(#mk-f)"${dim(a,b)}/>`; }
+    if(show.want && x.w) lines+=`<line ${seg(a,b,-4)} stroke="#c2952f" stroke-width="1.6" stroke-dasharray="2 4" marker-end="url(#mk-w)"${dim(a,b)}/>`; }));
+  const nodes=st.names.map(n=>{ const p=pos[n], r=st.rows.find(x=>x.name===n), lone=r.near===0, off=rad(n)+8, lx=p.x+Math.cos(p.a)*off, ly=p.y+Math.sin(p.a)*off;
+    const anchor=Math.abs(Math.cos(p.a))<0.25?"middle":Math.cos(p.a)>0?"start":"end", dy=Math.sin(p.a)>0.6?14:Math.sin(p.a)<-0.6?-4:5;
+    const faded=sel && sel!==n && !(st.get(sel,n)&&(st.get(sel,n).d!==2||st.get(sel,n).w)) && !(st.get(n,sel)&&(st.get(n,sel).d!==2||st.get(n,sel).w));
+    return `<g data-act="musel" data-v="${esc(n)}" style="cursor:pointer"${faded?' opacity=".3"':""}>
+      <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${rad(n).toFixed(1)}" fill="${n===sel?"#2f5d50":!r.done?"#ebe5da":lone?"#faf3e6":"#fffdf9"}" stroke="${n===sel?"#2f5d50":lone?"#c9a55a":"#2b2724"}" stroke-width="${lone?2.2:1.4}"/>
+      <text x="${p.x.toFixed(1)}" y="${(p.y+4.5).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" fill="${n===sel?"#fff":"#2b2724"}">${r.near}</text>
+      <text x="${lx.toFixed(1)}" y="${(ly+dy).toFixed(1)}" text-anchor="${anchor}" font-size="15" font-weight="${n===sel?800:600}" fill="#2b2724">${esc(n)}</text></g>`; }).join("");
+  const mk=(id,c)=>`<marker id="${id}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${c}"/></marker>`;
+  const chip=(k,label,c)=>`<button class="chip ${show[k]?"sel":""}" style="${show[k]?`background:${c}`:""}" data-act="mufilter" data-v="${k}">${label}</button>`;
+  return `<p class="sub">학생을 번호 순으로 둥글게 놓고 관계를 선으로 이었어요. 동그라미 속 숫자는 '가까운 거리'로 고름을 받은 수이고, 많이 받을수록 동그라미가 커요. 학생을 누르면 그 학생과 이어진 선만 진하게 보여요.</p>
+    <div class="row noprint">${chip("near","가까운 거리","#2f5d50")}${chip("far","아직 어색한 거리","#b9553f")}${chip("want","친해지고 싶어요","#c2952f")}${sel?`<button class="btn ghost small" data-act="musel" data-v="">선택 풀기</button>`:""}</div>
+    <svg viewBox="0 0 ${W} ${W}" style="width:100%;max-width:760px;display:block;margin:6px auto" role="img" aria-label="우리 반 마음거리 관계 그림">
+      <defs>${mk("mk-n","#8fb3a3")}${mk("mk-f","#cf8a78")}${mk("mk-w","#c2952f")}</defs>${lines}${nodes}</svg>
+    <p class="sub">굵은 녹색 선은 서로 가까운 사이, 가는 녹색 화살표는 한쪽만 가깝다고 고른 사이예요. 붉은 점선은 어색한 사이(굵으면 서로), 노란 점선 화살표는 친해지고 싶은 마음이에요.<br>
+      노란 테두리는 가까운 거리로 고름을 받지 못한 학생, 회색은 아직 응답하지 않은 학생이에요.</p>
+    ${sel?(()=>{ const r=st.rows.find(x=>x.name===sel), pick=(f)=>st.names.filter(n=>n!==sel&&f(n)).map(esc).join(", ")||"없음";
+      return `<div class="box"><b>${esc(sel)}</b> <span class="sub">받은 가까움 ${r.near} · 받은 어색함 ${r.far} · 점수 ${r.score}</span><ul class="clean">
+        <li><b>이 학생이 가깝다고 고른 친구:</b> ${pick(n=>st.get(sel,n)&&st.get(sel,n).d===1)}</li>
+        <li><b>이 학생을 가깝다고 고른 친구:</b> ${pick(n=>st.get(n,sel)&&st.get(n,sel).d===1)}</li>
+        <li><b>이 학생이 어색하다고 고른 친구:</b> ${pick(n=>st.get(sel,n)&&st.get(sel,n).d===3)}</li>
+        <li><b>이 학생을 어색하다고 고른 친구:</b> ${pick(n=>st.get(n,sel)&&st.get(n,sel).d===3)}</li>
+        <li><b>이 학생이 친해지고 싶어 하는 친구:</b> ${pick(n=>st.get(sel,n)&&st.get(sel,n).w)}</li>
+        <li><b>이 학생과 친해지고 싶어 하는 친구:</b> ${pick(n=>st.get(n,sel)&&st.get(n,sel).w)}</li></ul></div>`; })():""}`;
+}
+// 회차별 누적 비교
+function mindLine(series, labels, H){
+  const W=640, P=44, h=H||220, all=series.flatMap(s=>s.v), mx=Math.max(1,...all), mn=Math.min(0,...all), n=labels.length;
+  const X=i=>n===1?W/2:P+i*(W-2*P)/(n-1), Y=v=>h-30-(v-mn)*(h-60)/((mx-mn)||1);
+  let s=`<svg viewBox="0 0 ${W} ${h}" style="width:100%;max-width:640px;display:block" role="img">`;
+  [mn,(mn+mx)/2,mx].forEach(v=>{ s+=`<line x1="${P}" x2="${W-P}" y1="${Y(v)}" y2="${Y(v)}" stroke="#e6dfd2"/><text x="${P-8}" y="${Y(v)+4}" text-anchor="end" font-size="12" fill="#756b62">${Math.round(v)}</text>`; });
+  labels.forEach((l,i)=>{ s+=`<text x="${X(i)}" y="${h-8}" text-anchor="middle" font-size="12" fill="#756b62">${l}</text>`; });
+  series.forEach(sr=>{ if(n>1) s+=`<polyline fill="none" stroke="${sr.c}" stroke-width="2.4" points="${sr.v.map((v,i)=>X(i)+","+Y(v)).join(" ")}"/>`;
+    sr.v.forEach((v,i)=>{ s+=`<circle cx="${X(i)}" cy="${Y(v)}" r="4" fill="${sr.c}"/><text x="${X(i)}" y="${Y(v)-9}" text-anchor="middle" font-size="12" font-weight="700" fill="${sr.c}">${v}</text>`; }); });
+  return s+`</svg><div class="row sub" style="gap:16px">${series.map(sr=>`<span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${sr.c};margin-right:5px"></span>${sr.n}</span>`).join("")}</div>`;
+}
+function mindTrend(mv){
+  const rs=[]; for(let r=1;r<=mv.round;r++) rs.push(r);
+  const sts=rs.map(r=>mindStats(mv,r)), labels=rs.map(r=>r+"회차"), names=mv.roster.slice().sort(byNo);
+  const top=(st,k)=>st.rows.filter(r=>r[k]>0).sort((a,b)=>b[k]-a[k]||byNo(a.name,b.name)).slice(0,5).map(r=>`${esc(r.name)}(${r[k]})`).join(", ")||"-";
+  return `${rs.length<2?`<div class="note">지금은 1회차만 있어요. '새 회차 시작'으로 다음 검사를 하면 여기에서 변화를 비교할 수 있어요. 학기 초, 중간, 학기 말처럼 간격을 두고 하면 좋아요.</div>`:""}
+    <h3>우리 반 전체 점수</h3>
+    <p class="sub">학생별 점수(가까운 거리 +2, 친해지고 싶음 +1, 아직 어색한 거리 −1)를 모두 더한 값이에요. 클수록 반 안에 가까운 관계가 많아요.</p>
+    ${mindLine([{n:"우리 반 점수",c:"#2f5d50",v:sts.map(s=>s.total.score)}],labels,200)}
+    <h3>가까움 · 어색함 · 친해지고 싶음</h3>
+    ${mindLine([{n:"가까운 거리",c:"#5f8f7f",v:sts.map(s=>s.total.near)},{n:"아직 어색한 거리",c:"#b9553f",v:sts.map(s=>s.total.far)},{n:"친해지고 싶어요",c:"#c2952f",v:sts.map(s=>s.total.want)}],labels,230)}
+    <h3>회차별 정리</h3>
+    <div style="overflow-x:auto"><table>
+      <tr><th>회차</th><th>응답</th><th>서로 가까운 사이</th><th>서로 어색한 사이</th><th>가까움을 많이 받은 학생</th><th>어색함을 많이 받은 학생</th></tr>
+      ${sts.map((s,i)=>`<tr><td><b>${rs[i]}회차</b></td><td>${s.count}명</td><td>${s.mutual.length}쌍</td><td>${s.mutualFar.length}쌍</td><td class="sub">${top(s,"near")}</td><td class="sub">${top(s,"far")}</td></tr>`).join("")}
+    </table></div>
+    <h3>학생별 변화</h3>
+    <p class="sub">칸의 큰 숫자는 점수, 괄호 안은 받은 가까움 / 받은 어색함이에요.</p>
+    <div style="overflow-x:auto"><table>
+      <tr><th>이름</th>${labels.map(l=>`<th>${l}</th>`).join("")}${rs.length>1?"<th>변화</th>":""}</tr>
+      ${names.map(n=>{ const rr=sts.map(s=>s.rows.find(x=>x.name===n)), diff=rr[rr.length-1].score-rr[0].score;
+        return `<tr><td><b>${esc(n)}</b></td>${rr.map(r=>`<td><b>${r.score}</b> <span class="sub">(${r.near}/${r.far})</span></td>`).join("")}${rs.length>1?`<td style="font-weight:700;color:${diff>0?"#2f6d57":diff<0?"#a8463c":"#756b62"}">${diff>0?"+":""}${diff}</td>`:""}</tr>`; }).join("")}
+    </table></div>`;
+}
+function teacherMind(mv){
+  const round=Math.min(Math.max(1,S.mRound||mv.round),mv.round), st=mindStats(mv,round), sub=S.mSub||"all";
+  const pair=p=>`${esc(p[0])} ↔ ${esc(p[1])}`, arrow=p=>`${esc(p[0])} → ${esc(p[1])}`;
+  const listBox=(title,hint,items,cls)=>`<div class="box ${cls||""}"><b>${title}</b> <span class="sub">${items.length}${hint?" · "+hint:""}</span>
+      ${items.length?`<div style="margin-top:6px;line-height:2">${items.join(" &nbsp;|&nbsp; ")}</div>`:`<div class="sub" style="margin-top:4px">없어요</div>`}</div>`;
+  const tab=(v,l)=>`<span class="${sub===v?"on":""}" data-act="msub" data-v="${v}" style="cursor:pointer;font-size:.92rem">${l}</span>`;
+  let s=`<h2>마음거리 검사</h2>
+    <p class="sub">학생들이 반 친구 한 명 한 명과의 마음의 거리를 고르는 검사예요. <b>결과는 이 화면에서 선생님만 볼 수 있고, 학생에게는 보이지 않아요.</b> 에니어그램 검사를 마친 학생만 명단에 나오고 참여할 수 있어요.</p>
+    <div class="row between" style="padding:12px 0;border-bottom:1px solid var(--line)">
+      <div style="flex:1;min-width:200px"><b>학생 화면의 마음거리 탭: ${mv.tab?"켜짐":"꺼짐"}</b><br><span class="sub">켜면 학생들의 우리 반 화면에 '마음거리' 탭이 보이고 바로 참여할 수 있어요. 끄면 탭이 사라지고, 이미 낸 내용은 그대로 남아요.</span></div>
+      <button class="btn ${mv.tab?"ghost":""} small noprint" data-act="mset">${mv.tab?"끄기":"켜기"}</button></div>
+    <div class="row between" style="padding:12px 0;border-bottom:1px solid var(--line)">
+      <div style="flex:1;min-width:200px"><b>지금 받는 회차: ${mv.round}회차</b><br><span class="sub">학생이 내는 내용은 지금 회차에 저장돼요. 새 회차를 시작하면 이전 회차는 그대로 보관되고, 학생들은 처음부터 다시 골라요.</span></div>
+      <button class="btn ghost small noprint" data-act="mnew">새 회차 시작</button></div>
+    <div class="row noprint" style="margin-top:14px"><span class="sub">볼 회차</span>${Array.from({length:mv.round},(_,i)=>i+1).map(r=>`<button class="chip ${r===round?"sel":""}" style="${r===round?"background:var(--main)":""}" data-act="mround" data-v="${r}">${r}회차</button>`).join("")}</div>
+    <div class="steps noprint" style="margin:14px 0 6px">${tab("all","전체 보기")}${tab("uni","유니버스 보기")}${tab("matrix","전체 표")}${tab("trend","누적 비교")}</div>`;
+  if(sub==="trend") return s+mindTrend(mv)+`<p></p><div class="row noprint"><button class="btn ghost small" data-act="cvtab" data-v="mind">새로 고침</button><button class="btn ghost small" data-act="print">인쇄하기</button></div>`;
+  s+=`<h2>${round}회차 응답 현황</h2>
+    <p>명단 ${st.names.length}명 가운데 <b>${st.count}명</b>이 냈어요.${st.todo.length?`<br><span class="sub">아직 내지 않은 학생: ${st.todo.map(esc).join(", ")}</span>`:""}</p>`;
+  if(!st.count) return s+`<p class="sub">이 회차에는 아직 낸 학생이 없어요.</p><div class="row noprint"><button class="btn ghost small" data-act="cvtab" data-v="mind">새로 고침</button></div>`;
+  if(sub==="uni") s+=`<h2>유니버스 보기</h2>`+mindUniverse(st);
+  else if(sub==="matrix") s+=`<h2>전체 표</h2>
+    <p class="sub">가로줄이 고른 학생, 세로줄이 고름을 받은 학생이에요. 1 가까운 거리, 2 보통 거리, 3 아직 어색한 거리, ★ 친해지고 싶은 친구.</p>
+    <div style="overflow-x:auto"><table style="font-size:.8rem;text-align:center">
+      <tr><th style="white-space:normal">고른 학생 ↓ / 받은 학생 →</th>${st.names.map(n=>`<th style="text-align:center">${esc(n)}</th>`).join("")}</tr>
+      ${st.names.map(a=>`<tr><th>${esc(a)}</th>${st.names.map(b=>{ if(a===b) return `<td style="background:#ebe5da;text-align:center">–</td>`; const v=st.get(a,b); if(!v) return `<td></td>`;
+        return `<td style="text-align:center;${v.d===1?"background:#e4efe8":v.d===3?"background:#f8e1d6;color:#a8463c;font-weight:700":""}">${v.d}${v.w?"★":""}</td>`; }).join("")}</tr>`).join("")}
+    </table></div>`;
+  else s+=`<h2>학생별 정리</h2>
+    <p class="sub">받은 수는 다른 친구들이 이 학생을 고른 횟수예요. 점수는 가까운 거리 +2, 친해지고 싶음 +1, 아직 어색한 거리 −1로 계산했어요.</p>
+    <div style="overflow-x:auto"><table>
+      <tr><th>이름</th><th>받은 가까움</th><th>받은 어색함</th><th>친해지고 싶다는 수</th><th>점수</th><th>준 가까움</th><th>준 어색함</th></tr>
+      ${st.rows.map(r=>`<tr><td><b>${esc(r.name)}</b>${r.done?"":` <span class="tag">미응답</span>`}</td><td>${r.near}</td><td style="${r.far?"color:#a8463c;font-weight:700":""}">${r.far}</td><td>${r.want}</td><td><b>${r.score}</b></td><td>${r.done?r.gNear:"-"}</td><td>${r.done?r.gFar:"-"}</td></tr>`).join("")}
+    </table></div>
+    <h2>살펴볼 관계</h2>
+    ${listBox("서로 가까운 사이","모둠을 짤 때 안정감을 줘요",st.mutual.map(pair),"good")}
+    ${listBox("친해지고 싶어 하는 마음","상대는 아직 가까운 거리로 고르지 않았어요. 짝이나 모둠으로 이어 줄 수 있어요",st.wantOne.map(arrow),"friend")}
+    ${listBox("가까운 거리로 고른 친구가 없는 학생","먼저 살펴봐 주세요",st.lonely.map(esc),"grow")}
+    ${listBox("서로 어색한 사이","자리와 모둠을 정할 때 살펴봐 주세요",st.mutualFar.map(pair),"heart")}
+    ${listBox("한쪽이 어색하다고 고른 사이","화살표가 고른 방향이에요",st.oneFar.map(arrow),"heart")}
+    ${st.reasons.length?`<h2>학생들이 쓴 까닭</h2><div style="overflow-x:auto"><table>
+      <tr><th>고른 학생</th><th>대상</th><th>거리</th><th>까닭</th></tr>
+      ${st.reasons.map(r=>`<tr><td>${esc(r.a)}</td><td>${esc(r.b)}</td><td>${r.d===1?"가까운":"어색한"}</td><td>${esc(r.why)}</td></tr>`).join("")}
+    </table></div>`:""}`;
+  return s+`<p></p><div class="row noprint"><button class="btn ghost small" data-act="cvtab" data-v="mind">새로 고침</button><button class="btn ghost small" data-act="mcsv">${round}회차 엑셀(CSV)로 저장</button><button class="btn ghost small" data-act="print">인쇄하기</button></div>`;
+}
+function mindPage(){
+  const cls=S.vcls, mv=S.mv;
+  const back = S.cvFrom==="teacher"?["teacher","◀ 선생님 모드로"]:S.cvFrom==="result"?["result","◀ 결과로"]:["home","◀ 처음으로"];
+  const body = S.mvErr ? `<div class="note">${esc(S.mvErr)}</div>` : !mv ? `<p class="sub">불러오는 중이에요…</p>` : cvIsTeacher() ? teacherMind(mv) : studentMind(mv);
   return `
   <div class="card">
     <div class="row between"><h1 style="margin:0">${esc(clsName(cls))}</h1><button class="btn ghost small noprint" data-act="goto" data-v="${back[0]}">${back[1]}</button></div>
@@ -1577,9 +1768,15 @@ function teacherOnline(){
       <button class="btn ghost small" data-act="tgtab">${cur.gtab?"끄기":"켜기"}</button>
       <span class="sub">${cur.gtab?"학생들의 '우리 반 친구들' 화면에 이 탭이 보여요.":"학생들에게 이 탭이 보이지 않아요. 켜면 학생들이 선생님의 유형을 짐작해서 낼 수 있어요."}</span>
     </div>
+    <div class="row noprint" style="margin-bottom:10px">
+      <span>'마음거리' 탭: <b>${cur.mtab?"켜짐":"꺼짐"}</b></span>
+      <button class="btn ghost small" data-act="tmtab">${cur.mtab?"끄기":"켜기"}</button>
+      <span class="sub">${cur.mtab?"학생들이 마음거리 검사에 참여할 수 있어요. 결과는 선생님만 볼 수 있어요.":"학생들에게 이 탭이 보이지 않아요. 결과는 켜도 선생님만 볼 수 있어요."}</span>
+    </div>
     ${tSummary(list,false)}
     <p></p><div class="row noprint">
       <button class="btn ghost" data-act="tguess" data-v="${cur.code}">'선생님은 어떤 유형일까?' 활동</button>
+      <button class="btn ghost" data-act="tmind" data-v="${cur.code}">마음거리 검사</button>
       <button class="btn" data-act="classview" data-v="${cur.code}">'${esc(cur.name)} 친구들' 화면 열기</button>
     </div>
   </div>
@@ -1679,14 +1876,14 @@ const A = {
   delmine(v){ if(confirm("이 결과를 이 기기에서 지울까요? 되돌릴 수 없어요.")){ store.set("ennea_records",records().filter(x=>x.id!==v)); if(S.rec&&S.rec.id===v) S.rec=null; go("home"); toast("결과를 지웠어요"); } },
   classview(v){
     if(S.view!=="classview") S.cvFrom = S.view==="teacher"?"teacher":S.view==="result"?"result":"home";
-    S.vcls=v||""; S.openType=0; S.cvOnline=ONLINE&&isCode(S.vcls); S.cvMsg=""; S.cvTab="friends"; S.gv=null; S.gvErr=""; S.gpick=0; S.gtext=""; S.gedit=false; S.cvGuessTab=false; S.cvTOpen=false;
+    S.vcls=v||""; S.openType=0; S.cvOnline=ONLINE&&isCode(S.vcls); S.cvMsg=""; S.cvTab="friends"; S.gv=null; S.gvErr=""; S.gpick=0; S.gtext=""; S.gedit=false; S.cvGuessTab=false; S.cvTOpen=false; S.cvMindTab=false; S.mv=null; S.mvErr=""; S.md={}; S.mRound=0; S.mSub="all"; S.muSel="";
     S.cvTeacher = (ONLINE ? (S.tok && S.tcls===S.vcls) : true) && myTShow() && myTType() ? {name:ONLINE?S.tname:"",type:myTType()} : null;
     if(S.cvOnline){
       if(S.tok && S.tcls===S.vcls) S.cvList=S.tlist.map(r=>({name:r.name,t:r.chosen||calc(r).top}));
       else {
         S.cvList=null; S.cvMsg="불러오는 중이에요…";
         api("classmates",{code:S.vcls}).then(
-          j=>{ S.cvList=j.list.map(x=>({name:x.name,t:x.type})); S.cvMsg=j.share?"":"선생님이 아직 '반 친구들끼리 유형 보기'를 열지 않았어요."; S.cvTeacher=j.teacher||null; S.cvGuessTab=!!j.guessTab; },
+          j=>{ S.cvList=j.list.map(x=>({name:x.name,t:x.type})); S.cvMsg=j.share?"":"선생님이 아직 '반 친구들끼리 유형 보기'를 열지 않았어요."; S.cvTeacher=j.teacher||null; S.cvGuessTab=!!j.guessTab; S.cvMindTab=!!j.mindTab; },
           e=>{ S.cvMsg=e.message; }
         ).then(()=>{ if(S.view==="classview") render(); });
       }
@@ -1892,7 +2089,42 @@ Object.assign(A,{
   }
 });
 Object.assign(A,{
-  cvtab(v){ S.cvTab=v==="guess"?"guess":"friends"; S.gedit=false; render(); window.scrollTo(0,0); if(S.cvTab==="guess") return loadGuess(); },
+  cvtab(v){ S.cvTab=v==="guess"?"guess":v==="mind"?"mind":"friends"; S.gedit=false; render(); window.scrollTo(0,0); if(S.cvTab==="guess") return loadGuess(); if(S.cvTab==="mind") return loadMind(); },
+  tmind(v){ A.classview(v); return A.cvtab("mind"); },
+  tmtab(){ const c=S.tclasses.find(x=>x.code===S.tcls); if(c) return tcall("setMind",{code:c.code,tab:!c.mtab},j=>{ if(j.classes) S.tclasses=j.classes; }); },
+  mset(){ if(S.mv) return tcall("setMind",{code:S.vcls,tab:!S.mv.tab},j=>{ S.mv=j; if(j.classes) S.tclasses=j.classes; }); },
+  mround(v){ S.mRound=+v; S.muSel=""; render(); },
+  msub(v){ S.mSub=v; S.muSel=""; render(); },
+  musel(v){ S.muSel = S.muSel===v ? "" : (v||""); render(); },
+  mufilter(v){ S.muShow={...S.muShow,[v]:S.muShow[v]?0:1}; render(); },
+  mnew(){
+    if(!S.mv) return;
+    if(!confirm(`${S.mv.round}회차를 마치고 ${S.mv.round+1}회차를 시작할까요? ${S.mv.round}회차 결과는 그대로 보관되고, 학생들은 처음부터 다시 고르게 돼요. 되돌릴 수 없어요.`)) return;
+    return tcall("setMind",{code:S.vcls,newRound:true},j=>{ S.mv=j; S.mRound=j.round; S.mSub="all"; if(j.classes) S.tclasses=j.classes; });
+  },
+  mdist(v){ const i=v.indexOf("|"), d=+v.slice(0,i), n=v.slice(i+1), cur=S.md[n]||{d:2,w:0,why:""}; S.md[n]={d,w:cur.w,why:d===2?"":cur.why}; render(); },
+  mwant(v){
+    const cur=S.md[v]||{d:2,w:0,why:""};
+    if(!cur.w && Object.values(S.md).filter(x=>x.w).length>=3){ toast("친해지고 싶은 친구는 3명까지 고를 수 있어요"); return; }
+    S.md[v]={...cur,w:cur.w?0:1}; render();
+  },
+  async msend(){
+    const me=cvMe(); if(!me) return;
+    toast("보내는 중이에요…");
+    try{ await api("mindSubmit",{code:S.vcls,name:me.name,pin:me.pin||"",data:S.md}); }catch(e){ toast(e.message); return; }
+    await loadMind(); window.scrollTo(0,0); toast("선생님께 보냈어요. 고맙습니다");
+  },
+  mcsv(){
+    if(!S.mv) return; const rd=Math.min(Math.max(1,S.mRound||S.mv.round),S.mv.round), st=mindStats(S.mv,rd);
+    const rows=[["고른 학생 \\ 받은 학생",...st.names]];
+    st.names.forEach(a=>rows.push([a,...st.names.map(b=>{ if(a===b) return "-"; const v=st.get(a,b); return v?(v.d+(v.w?"★":"")):""; })]));
+    rows.push([]); rows.push(["이름","받은 가까움","받은 어색함","친해지고 싶다는 수","점수","준 가까움","준 어색함","응답"]);
+    st.rows.forEach(r=>rows.push([r.name,r.near,r.far,r.want,r.score,r.gNear,r.gFar,r.done?"함":"안 함"]));
+    rows.push([]); rows.push(["고른 학생","대상","거리","까닭"]);
+    st.reasons.forEach(r=>rows.push([r.a,r.b,r.d===1?"가까운":"어색한",r.why]));
+    const csv="\ufeff"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+    download(new Blob([csv],{type:"text/csv;charset=utf-8"}),`마음거리_${clsName(S.vcls)}_${rd}회차.csv`);
+  },
   tguess(v){ A.classview(v); return A.cvtab("guess"); },
   tgtab(){ const c=S.tclasses.find(x=>x.code===S.tcls); if(c) return tcall("setGuess",{code:c.code,tab:!c.gtab},j=>{ if(j.classes) S.tclasses=j.classes; }); },
   gpick(v){ const el=document.getElementById("gwhy"); if(el) S.gtext=el.value; S.gpick=+v; render(); },
@@ -1935,6 +2167,7 @@ document.addEventListener("input",e=>{
   if(e.target.id==="cc") S.ccode=e.target.value.toUpperCase();
   if(e.target.id==="pn") S.pin=e.target.value;
   if(e.target.id==="gwhy") S.gtext=e.target.value;
+  if(e.target.dataset && e.target.dataset.mwhy){ const n=e.target.dataset.mwhy; S.md[n]={...(S.md[n]||{d:2,w:0}),why:e.target.value}; }
   if((e.target.id==="nm"||e.target.id==="cc"||e.target.id==="pn") && S.found){ S.found=null; S.retake=false; }
   if(e.target.id==="pledge" && S.rec && !S.from){ S.rec.pledge=e.target.value; saveRecord(S.rec); pushSoon(S.rec); }
 });
