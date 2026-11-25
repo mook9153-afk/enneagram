@@ -562,14 +562,14 @@ function b64e(s){ return btoa(unescape(encodeURIComponent(s))).replace(/\+/g,"-"
 function b64d(s){ s=s.replace(/-/g,"+").replace(/_/g,"/"); while(s.length%4) s+="="; return decodeURIComponent(escape(atob(s))); }
 function toCode(rec){
   const digits = rec.ans.join("") + (FEEL.findIndex(f=>f.k===rec.feel.k)+1) + (rec.feel.s||1) + (rec.feel.r||0) + rec.deep.join("") + (rec.chosen||0);
-  return "E" + BigInt("1"+digits).toString(36) + "." + b64e(rec.name+"\n"+(rec.cls||""));
+  return "E" + BigInt("1"+digits).toString(36) + "." + b64e([rec.name,rec.cls||"",rec.aud||"kid",rec.mode||"class",rec.date||"",rec.pledge||""].join("\n"));
 }
 function fromCode(code){
   const m = /^E([0-9a-z]+)\.([\w-]+)$/.exec(code.trim()); if(!m) return null;
   let n = 0n; for(const ch of m[1]) n = n*36n + BigInt(parseInt(ch,36));
   const d = n.toString().slice(1); if(d.length!==68) return null;
-  const [name,cls=""] = b64d(m[2]).split("\n");
-  return {id:"c"+m[1].slice(0,14)+m[2].slice(0,6), name, mode:"class", cls, date:new Date().toISOString().slice(0,10),
+  const [name,cls="",aud="kid",mode="class",date="",pledge=""] = b64d(m[2]).split("\n");
+  return {id:"c"+m[1].slice(0,14)+m[2].slice(0,6), name, mode:mode==="private"?"private":"class", cls, aud:aud==="adult"?"adult":"kid", pledge:pledge.slice(0,80), date:/^\d{4}-\d\d-\d\d$/.test(date)?date:new Date().toISOString().slice(0,10),
     ans:d.slice(0,60).split("").map(Number), feel:{k:(FEEL[+d[60]-1]||{}).k||null, s:+d[61], r:+d[62]},
     deep:d.slice(63,67).split("").map(Number), chosen:+d[67]||0, imported:true};
 }
@@ -800,9 +800,22 @@ V.result = () => {
   const r=S.rec, c=calc(r), fin=r.chosen||c.top, show=S.show||fin, T=TYPES[show];
   const f=FEEL.find(x=>x.k===r.feel.k), re=REACT[r.feel.r||0];
   const agree = c.feelType===c.qRank[0] && c.deepTop[0]===c.qRank[0];
-  const cands=[...new Set([fin, ...c.rank.slice(0,3)])].slice(0,4);
   const qTies = c.qRank.filter(t=>c.q[t]===c.q[c.qRank[0]]);
   const readonly = !!S.from;
+  const maxT = Math.max(1, c.total[c.rank[0]]);
+  const rankNo = i => { let k=i; while(k>0 && c.total[c.rank[k-1]]===c.total[c.rank[i]]) k--; return k+1; };
+  const why = t => { const a=[];
+    if(c.feelType===t) a.push("느낌 찾기에서 고른 말"); else if(re.types.includes(t)) a.push("올라온 느낌과 같은 중심");
+    a.push(`검사지 ${c.q[t]}점(${c.qRank.indexOf(t)+1}번째)`);
+    if(c.deepCount[t]) a.push(`마음 질문 ${c.deepCount[t]}번 선택`);
+    return a.join(" · "); };
+  const medal = ["#f6c343","#cfd4dc","#e3ae82"];
+  const rankRow = (t,i) => { const n=rankNo(i); return `<button class="opt ${t===show?"sel":""}" data-act="show" data-v="${t}" style="align-items:flex-start">
+      <span class="n" style="${n<=3?`background:${medal[n-1]};color:#2f3542`:""}">${n}</span>
+      <span style="flex:1"><b>${TYPES[t].e} ${t}번 ${TYPES[t].nick}</b>${r.chosen===t?` <span class="tag" style="background:#e3f6ef;color:#1f8a68">✔ 내가 고른 유형</span>`:""}<br>
+        <span class="sub" style="font-weight:400">${TYPES[t].one}</span>
+        <span style="display:block;height:8px;background:#e9edf5;border-radius:99px;margin:7px 0 4px;overflow:hidden"><i style="display:block;height:100%;width:${Math.round(c.total[t]/maxT*100)}%;background:${TYPES[t].color};border-radius:99px"></i></span>
+        <span class="sub" style="font-weight:400;font-size:.85rem">${why(t)}</span></span></button>`; };
   return `
   ${readonly?"":stepsBar(4)}
   <div class="hero" style="background:linear-gradient(135deg,${TYPES[fin].color},${TYPES[fin].color}cc)">
@@ -810,10 +823,22 @@ V.result = () => {
     <div class="big-emoji">${TYPES[fin].e}</div>
     <h1>${fin}번 · ${TYPES[fin].nick}</h1>
     <div class="sub">${TYPES[fin].one}</div>
+    <div style="margin-top:12px"><span style="background:rgba(255,255,255,.25);padding:5px 16px;border-radius:99px;font-weight:700;font-size:.92rem">${r.chosen?"✔ 내가 고른 나의 유형":"🏅 추천 1순위 · 아직 내 유형을 고르지 않았어요"}</span></div>
   </div>
   <div class="${isClass(r)?"calm":"note"}" style="text-align:center">${isClass(r)
     ? "🏫 <b>"+esc(clsName(r.cls))+"</b>에서 검사했어요. 선생님이 결과를 볼 수 있고, 반 친구들은 내 이름과 유형을 볼 수 있어요.<span id='sync'>"+syncHTML(r)+"</span>"
+    : r.link ? "🔗 <b>저장해 둔 주소로 다시 연 결과</b>예요. 이 기기에서 나만 볼 수 있고, 첫 화면의 '혼자 검사한 내 결과'에도 남아요."
     : "🔒 <b>혼자 검사한 결과</b>예요. 선생님이나 다른 사람에게 전해지지 않고 이 기기에서 나만 볼 수 있어요."}</div>
+
+  <div class="card" style="border:3px solid #cfe0ff">
+    <h2 style="margin-top:0">🧭 나를 알아가는 여행</h2>
+    <p>${ka(
+      `이 결과는 <b>정답이 아니라 출발점</b>이에요. 사람마다 자기만의 유형이 있지만, 검사 한 번으로 정확하게 드러나지 않을 수도 있어요. 그날의 기분에 따라, 또는 '평소의 나'가 아니라 '되고 싶은 나'를 골랐을 때 다르게 나오기도 하거든요.`,
+      `이 결과는 <b>정답이 아니라 출발점</b>이에요. 누구에게나 기본 유형이 있지만, 한 번의 검사로 정확히 드러나지 않을 수 있어요. 그날의 상태, 지금 맡고 있는 역할, '되고 싶은 나'의 모습이 답에 섞이기 때문이에요.`)}</p>
+    <p>${ka(
+      `그래서 아래 <b>추천 순위</b>를 참고해서 설명을 하나씩 읽어 보고, <b>"아, 이건 정말 나다!"</b> 싶은 유형을 스스로 골라 보세요. 지금 딱 정하지 못해도 괜찮아요. 호기심을 가지고 평소의 나를 살펴보면서 천천히 찾아가면 돼요. 이건 <b>나를 알아가는 여행</b>이니까요.`,
+      `아래 <b>추천 순위</b>를 참고해 설명을 하나씩 읽어 보고, 가장 나와 가깝다고 느껴지는 유형을 스스로 골라 보세요. 지금 결론을 내리지 않아도 괜찮아요. 일상에서 내가 무엇을 바라고 무엇을 두려워하는지 호기심을 가지고 지켜보다 보면 점점 분명해져요. 에니어그램은 <b>나를 알아가는 여행</b>이에요.`)}</p>
+  </div>
 
   <div class="card">
     <h2 style="margin-top:0">🔎 세 가지 방법으로 찾아봤어요</h2>
@@ -823,16 +848,22 @@ V.result = () => {
       <tr><th>③ 마음 질문</th><td>${c.deepTop.length?c.deepTop.map(t=>`<b>${t}번</b> <span class="sub">${c.deepCount[t]}번 선택</span>`).join(" · "):"-"}</td></tr>
     </table>
     <div class="${agree?"calm":"note"}">${agree
-      ? "🎯 세 가지 방법이 모두 같은 유형을 가리켜요!"
-      : "세 가지 결과가 조금 달라요. 괜찮아요! 사람은 여러 모습을 함께 가지고 있어요. 아래 <b>후보 유형</b>을 눌러 읽어 보고, <b>나와 가장 비슷한 유형</b>을 스스로 골라 보세요."}</div>
-    <h3>후보 유형 <span class="sub">(검사지 점수 + 느낌 찾기 + 마음 질문을 합친 순서)</span></h3>
-    <div class="row noprint">${cands.map(t=>`<button class="chip ${t===show?"sel":""}" style="${t===show?`background:${TYPES[t].color}`:""}" data-act="show" data-v="${t}">${TYPES[t].e} ${t}번 ${TYPES[t].nick}${t===fin?" ✔":""}</button>`).join("")}</div>
+      ? "🎯 세 가지 방법이 모두 같은 유형을 가리켜요! 그래도 설명을 읽어 보고 정말 나와 같은지 스스로 확인해 보세요."
+      : "세 가지 결과가 조금 달라요. 괜찮아요! 사람은 여러 모습을 함께 가지고 있어요. 그래서 세 가지를 합쳐 아래에 <b>추천 순위</b>를 만들었어요."}</div>
+
+    <h2>🏅 세 가지를 합친 추천 순위</h2>
+    <p class="sub">검사지 점수에 느낌 찾기와 마음 질문 결과를 더해서, 나와 가까울 것 같은 순서로 정리했어요.<br>순위가 높다고 꼭 내 유형인 것은 아니에요. 하나씩 눌러 설명을 읽어 보세요.</p>
+    ${c.rank.slice(0,3).map(rankRow).join("")}
+    <details style="margin-top:6px"${c.rank.indexOf(show)>2||c.rank.indexOf(r.chosen)>2?" open":""}><summary class="sub" style="cursor:pointer;padding:6px 0">4위부터 9위까지 보기</summary>
+      ${c.rank.slice(3).map((t,i)=>rankRow(t,i+3)).join("")}
+    </details>
+    ${readonly?"":`<div class="calm">👉 읽어 보고 <b>가장 나와 비슷하다고 느껴지는 유형</b>에서 <b>'이 유형이 나와 가장 비슷해요'</b>를 눌러 주세요. 나중에 언제든지 다시 고를 수 있어요.</div>`}
   </div>
 
-  <div class="card">
+  <div class="card" id="tdetail">
     <div class="row between">
       <h2 style="margin:0">${T.e} ${show}번 · ${T.nick}</h2>
-      ${readonly||show===fin?"":`<button class="btn small noprint" data-act="choose" data-v="${show}">이 유형이 나와 가장 비슷해요</button>`}
+      ${readonly?"":r.chosen===show?`<span class="tag" style="background:#e3f6ef;color:#1f8a68;font-size:.9rem">✔ 내가 고른 유형</span>`:`<button class="btn small noprint" data-act="choose" data-v="${show}">이 유형이 나와 가장 비슷해요</button>`}
     </div>
     ${typeDetail(show,c)}
     ${show===fin?`
@@ -868,9 +899,11 @@ V.result = () => {
       ${isClass(r)?`<button class="btn" data-act="classview" data-v="${esc(r.cls||"")}">🏫 우리 반 친구들 보기</button>`:""}
     </div>
     <h3>결과 간직하기</h3>
+    ${readonly?"":`<p class="sub">다음에 다시 보려면 <b>'내 결과 다시 보기 주소'</b>를 복사해서 메모장이나 카카오톡 '나에게 보내기'에 저장해 두세요. 그 주소를 열면 어느 기기에서든 이 결과가 다시 나와요. ${isClass(r)?"":"같은 기기에서는 첫 화면의 '혼자 검사한 내 결과'에도 남아 있어요. "}주소를 아는 사람은 누구나 볼 수 있으니 다른 사람에게는 보내지 마세요.</p>`}
     <div class="row">
       <button class="btn ghost small" data-act="png">🖼 결과 사진 저장</button>
       <button class="btn ghost small" data-act="print">🖨 인쇄하기</button>
+      ${readonly||!myLink(r)?"":`<button class="btn small" data-act="mylink">🔗 내 결과 다시 보기 주소 복사</button>`}
       ${readonly||!isClass(r)||isOnlineCls(r)?"":`<button class="btn ghost small" data-act="code">📮 선생님께 보낼 결과 코드 복사</button>`}
     </div>
     <p></p>
@@ -1061,6 +1094,7 @@ function qrSVG(text,px){
   const n=m.length+8;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${n} ${n}" width="${px}" height="${px}" shape-rendering="crispEdges" role="img" aria-label="QR 코드"><rect width="${n}" height="${n}" fill="#fff"/><path d="${qrPath(m,4)}" fill="#000"/></svg>`;
 }
+const myLink = rec => /^https?:/.test(location.protocol) ? location.origin+location.pathname+"#r="+encodeURIComponent(toCode(rec)) : "";
 const classLink = code => /^https?:/.test(location.protocol) ? location.origin+location.pathname+"?c="+code : "";
 
 V.qr = () => {
@@ -1304,8 +1338,8 @@ const A = {
   deep(v){ const i=S.di; S.deep[i]=+v; saveProgress(); render(); setTimeout(()=>{ if(S.view==="deep" && S.di===i && i<3) A.dnext(); },260); },
   dnext(){ if(!S.deep[S.di]) return; if(S.di<3){ S.di++; saveProgress(); render(); window.scrollTo(0,0); } else finish(); },
   dprev(){ if(S.di>0){ S.di--; render(); } else { S.qi=59; go("quiz"); } },
-  show(v){ S.show=+v; render(); },
-  choose(v){ S.rec.chosen=+v; S.show=+v; saveRecord(S.rec); pushSoon(S.rec); render(); window.scrollTo(0,0); toast("나의 유형으로 정했어요"); },
+  show(v){ S.show=+v; render(); const d=document.getElementById("tdetail"); if(d) d.scrollIntoView({behavior:"smooth"}); },
+  choose(v){ S.rec.chosen=+v; S.show=+v; saveRecord(S.rec); pushSoon(S.rec); render(); window.scrollTo(0,0); toast("나의 유형으로 골랐어요. 언제든 다시 고를 수 있어요"); },
   types(){ S.openType=0; go("types"); },
   opentype(v){ S.openType=+v; render(); const d=document.getElementById("detail"); if(d) d.scrollIntoView({behavior:"smooth"}); },
   friend(){ go("friend"); },
@@ -1338,7 +1372,7 @@ const A = {
   tclear(){ const ids=new Set(teacherList().map(r=>r.id)); if(confirm((S.tcls==="*"?"전체":clsName(S.tcls))+" 결과 "+ids.size+"명을 모두 삭제할까요? 되돌릴 수 없어요.")){ store.set("ennea_records",records().filter(r=>!ids.has(r.id))); render(); } },
   import(){
     const lines=document.getElementById("codes").value.split(/\s+/).filter(Boolean); let ok=0,bad=0;
-    lines.forEach(l=>{ let r=null; try{ r=fromCode(l); }catch(e){} if(r){ saveRecord(r); ok++; } else bad++; });
+    lines.forEach(l=>{ let r=null; try{ r=fromCode(l); }catch(e){} if(r){ r.mode="class"; r.aud="kid"; saveRecord(r); ok++; } else bad++; });
     render(); toast(`${ok}명 추가${bad?`, ${bad}개는 코드가 올바르지 않아요`:""}`);
   },
   backup(){
@@ -1421,6 +1455,12 @@ Object.assign(A,{
   areset(v){ if(confirm(`${adminName(v)} 선생님의 비밀번호를 임시 비밀번호로 바꿀까요? 지금 비밀번호는 더 쓸 수 없게 돼요.`)) return tcall("adminResetPw",{id:v},j=>{ S.atemp={name:j.name,loginId:j.loginId,pw:j.tempPassword}; }); },
   adel(v){ if(confirm(`${adminName(v)} 선생님을 삭제할까요? 이 선생님의 반과 학생 결과도 모두 지워지고 되돌릴 수 없어요.`)) return tcall("adminDeleteTeacher",{id:v},j=>{ S.adm=j; }); },
   atempclose(){ S.atemp=null; render(); },
+  mylink(){
+    const url=myLink(S.rec); if(!url) return;
+    const done=()=>toast("주소를 복사했어요. 메모장이나 '나에게 보내기'에 붙여 두세요");
+    if(navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(done,()=>prompt("아래 주소를 복사해서 저장해 두세요",url));
+    else prompt("아래 주소를 복사해서 저장해 두세요",url);
+  },
   qrbig(){ go("qr"); },
   qrpng(){
     const c=S.tclasses.find(x=>x.code===S.tcls), m=c&&qrMatrix(classLink(c.code)); if(!m) return;
@@ -1492,32 +1532,65 @@ document.addEventListener("change",e=>{ if(e.target.id==="gr"||e.target.id==="bn
 
 /* 결과 사진(PNG) 만들기 */
 function savePNG(r){
-  const c=calc(r), t=r.chosen||c.top, T=TYPES[t], W=900, H=1280;
-  const cv=document.createElement("canvas"); cv.width=W; cv.height=H; const g=cv.getContext("2d");
+  const c=calc(r), t=r.chosen||c.top, T=TYPES[t], W=900, P=40, IN=40, LH=36, FS=25;
+  const cv=document.createElement("canvas"), g=cv.getContext("2d");
   const font=(px,w)=>g.font=`${w||400} ${px}px "Malgun Gothic","Apple SD Gothic Neo","Noto Sans KR",sans-serif`;
+  const split=(text,px,w,maxW)=>{ font(px,w); const out=[]; let line="";
+    for(const word of String(text).split(" ")){ const tt=line?line+" "+word:word; if(g.measureText(tt).width>maxW && line){ out.push(line); line=word; } else line=tt; }
+    out.push(line); return out; };
+  const wing=wingOf(t,c.q);
+  const secs=[
+    {bg:"#ffffff",title:"",items:[T.desc]},
+    {bg:"#eaf7f1",title:"🌟 나의 강점",items:T.good.map(x=>"• "+x)},
+    {bg:"#fff4e8",title:"🌱 이렇게 하면 더 멋져져요",items:T.grow.map(x=>"• "+x)},
+    {bg:"#fdeef3",title:"💭 내 마음속 이야기",items:["• 바라는 것: "+T.want,"• 걱정되는 것: "+T.fear]},
+    {bg:"#f3f5fb",title:"🔄 상황에 따라 달라지는 나",items:[
+      `• 많이 힘들고 지칠 때: ${STRESS[t]}번 유형의 아쉬운 모습처럼 ${TYPES[STRESS[t]].low}`,
+      `• 마음이 편안하고 자라날 때: ${GROWTH[t]}번 유형의 좋은 모습처럼 ${TYPES[GROWTH[t]].high}`,
+      wing?`• 나의 날개: 옆자리 ${wing}번 ${TYPES[wing].nick}의 모습도 조금 가지고 있어요.`:""].filter(Boolean)},
+    {bg:"#eef2ff",title:"🤝 "+ka("친구들과 잘 지내는 팁","관계를 위한 팁"),items:[T.tip,"• 듣고 싶은 말: "+T.like]},
+    {bg:"#eaf7f1",title:"🎯 성장 미션",items:T.mission.map(x=>"• "+x).concat(r.pledge?["✏️ 나의 다짐: "+r.pledge]:[])},
+    {bg:"#ffffff",title:"🏅 세 가지를 합친 추천 순위",items:c.rank.slice(0,3).map((x,i)=>`${i+1}위   ${x}번 ${TYPES[x].nick} — ${TYPES[x].one}`)}
+  ].map(s=>{ const L=s.items.map(it=>split(it,FS,400,W-2*P-2*IN)); return {...s,L,h:28+(s.title?48:0)+L.reduce((n,l)=>n+l.length*LH+8,0)+14}; });
+  const foot=split(ka("이 결과는 정답이 아니라 출발점이에요. 호기심을 가지고 평소의 나를 살펴보며 나를 알아가는 여행을 계속해요.",
+                      "이 결과는 정답이 아니라 출발점이에요. 호기심을 가지고 일상의 나를 살펴보며 나를 알아가는 여행을 계속해 보세요."),23,600,W-2*P-20);
+  const HERO=390, RADAR=430;
+  const H=P+HERO+20+RADAR+20+secs.reduce((n,s)=>n+s.h+16,0)+foot.length*32+70;
+  cv.width=W; cv.height=H;
   g.fillStyle="#fdf6ec"; g.fillRect(0,0,W,H);
-  g.fillStyle=T.color; rr(g,40,40,W-80,360,36); g.fill();
+  // 머리 부분
+  g.fillStyle=T.color; rr(g,P,P,W-2*P,HERO,36); g.fill();
   g.fillStyle="#fff"; g.textAlign="center";
   font(30,600); g.fillText(`${r.name}${ka(" 친구의"," 님의")} 에니어그램`,W/2,100);
   font(120); g.fillText(T.e,W/2,235);
   font(54,800); g.fillText(`${t}번 · ${T.nick}`,W/2,320);
-  font(28,500); g.fillText(T.one,W/2,368);
-  // 그래프
-  g.fillStyle="#fff"; rr(g,40,420,W-80,430,30); g.fill();
-  const cx=W/2, cy=640, R=140, max=Math.max(40,...Object.values(c.q));
+  font(28,500); g.fillText(T.one,W/2,366);
+  font(22,700); g.fillText(r.chosen?"✔ 내가 고른 나의 유형":"🏅 추천 1순위 (아직 고르지 않았어요)",W/2,408);
+  // 점수 그래프
+  let y=P+HERO+20;
+  g.fillStyle="#fff"; rr(g,P,y,W-2*P,RADAR,30); g.fill();
+  const cx=W/2, cy=y+220, R=140, max=Math.max(40,...Object.values(c.q));
   const pt=(i,rad)=>{ const a=-Math.PI/2+i*2*Math.PI/9; return [cx+rad*Math.cos(a), cy+rad*Math.sin(a)]; };
   g.strokeStyle="#dfe4ee"; g.lineWidth=1.5;
   [.25,.5,.75,1].forEach(k=>{ g.beginPath(); ORDER.forEach((_,i)=>{ const p=pt(i,R*k); i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]); }); g.closePath(); g.stroke(); });
   g.beginPath(); ORDER.forEach((tt,i)=>{ const p=pt(i,R*c.q[tt]/max); i?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]); }); g.closePath();
   g.fillStyle=T.color+"44"; g.fill(); g.strokeStyle=T.color; g.lineWidth=4; g.stroke();
   ORDER.forEach((tt,i)=>{ const p=pt(i,R+42); g.fillStyle="#2f3542"; font(24,tt===t?800:600); g.fillText(`${tt}번`,p[0],p[1]); g.fillStyle="#69707d"; font(20); g.fillText(`${c.q[tt]}점`,p[0],p[1]+24); });
-  // 강점
-  g.fillStyle="#fff"; rr(g,40,870,W-80,370,30); g.fill();
-  g.textAlign="left"; g.fillStyle="#2f3542"; font(30,800); g.fillText("🌟 나의 강점",80,925);
-  font(24,400); let y=970;
-  T.good.forEach(s=>{ y=wrap(g,"• "+s,80,y,W-160,34)+8; });
-  if(r.pledge){ font(26,800); g.fillStyle=T.color; y+=14; g.fillText("✏️ 나의 다짐",80,y); y+=38; g.fillStyle="#2f3542"; font(24,400); wrap(g,r.pledge,80,y,W-160,34); }
-  g.textAlign="center"; g.fillStyle="#9aa1ad"; font(20); g.fillText(`나를 찾는 에니어그램 여행 · ${r.date}`,W/2,H-22);
+  y+=RADAR+20;
+  // 설명 칸들
+  g.textAlign="left";
+  secs.forEach(s=>{
+    g.fillStyle=s.bg; rr(g,P,y,W-2*P,s.h,26); g.fill();
+    let ty=y+28+26;
+    if(s.title){ g.fillStyle="#2f3542"; font(29,800); g.fillText(s.title,P+IN,ty); ty+=48; }
+    g.fillStyle="#2f3542"; font(FS,400);
+    s.L.forEach(l=>{ l.forEach((line,i)=>{ g.fillText(i&&/^[•✏]/.test(l[0])?"   "+line:line,P+IN,ty); ty+=LH; }); ty+=8; });
+    y+=s.h+16;
+  });
+  // 맺음말
+  g.textAlign="center"; g.fillStyle=T.color; font(23,600);
+  y+=22; foot.forEach(line=>{ g.fillText(line,W/2,y); y+=32; });
+  g.fillStyle="#9aa1ad"; font(20); g.fillText(`나를 찾는 에니어그램 여행 · ${r.date}`,W/2,H-24);
   cv.toBlob(b=>download(b,`에니어그램_${r.name}.png`),"image/png");
 }
 function rr(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
@@ -1526,6 +1599,16 @@ function wrap(g,text,x,y,maxW,lh){
   g.fillText(line,x,y); return y+lh;
 }
 
+/* '내 결과 다시 보기 주소'(#r=...)로 들어온 경우: 결과를 이 기기에 담고 바로 보여 준다 */
+(function(){
+  let m=null; try{ m=/^#r=(.+)$/.exec(location.hash||""); }catch(e){}
+  if(!m) return;
+  let r=null; try{ r=fromCode(decodeURIComponent(m[1])); }catch(e){}
+  try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
+  if(!r) return;
+  r.mode="private"; r.cls=""; r.link=true; r.imported=false;
+  saveRecord(r); S.rec=r; S.show=0; S.from=null; S.view="result";
+})();
 render();
 </script>
 </body>
