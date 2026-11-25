@@ -115,6 +115,54 @@ details > summary{cursor:pointer}
 .steps-list b{display:block}
 .steps-list span{color:var(--sub);font-size:.93rem}
 @media(max-width:560px){.hero-home h1{font-size:1.7rem}}
+/* ---- 글씨 크기: 전체를 한 단계 키움 ---- */
+html{font-size:112.5%}
+@media(max-width:560px){html{font-size:106%}}
+#app{max-width:780px}
+.sub{font-size:.95rem}
+.steps span{font-size:.86rem}
+.tag{font-size:.82rem}
+th{font-size:.9rem}
+.tone{font-size:.92rem}
+
+/* ---- 누를 수 있는 것은 색으로 구분 ---- */
+.btn.ghost{background:#e7f0ea;color:var(--main-d);border-color:#9fbcae}
+.btn.ghost:hover{background:#d8e7dd}
+.btn.danger{background:#f9ebe7;color:#a8463c;border-color:#dba99f}
+.btn.danger:hover{background:#f3dcd6}
+.btn.warm{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.warm:hover{background:#a2573b}
+.chip{background:#eef3ee;border-color:#9fbcae;color:var(--main-d)}
+.chip:hover{background:#dfeae2}
+.linkbtn{color:var(--main-d);font-weight:700}
+.opt{border:1.5px solid #b9cfc3}
+.opt .n{border-color:#7fa694;color:var(--main-d);background:#f1f6f2}
+.opt:hover{background:#f1f6f2;border-color:var(--main)}
+.tcard{border:1.5px solid #b9cfc3;background:#f6f9f6}
+.tcard:hover{border-color:var(--main);background:#eaf2ec}
+details > summary{color:var(--main-d);font-weight:700}
+
+/* 첫 화면: 검사 방법 고르기 */
+.tcard.mode{position:relative;padding:20px 44px 20px 20px;border-width:2px;border-radius:14px}
+.tcard.mode b{font-size:1.15rem}
+.tcard.mode::after{content:"›";position:absolute;right:18px;top:50%;transform:translateY(-50%);font-size:1.9rem;line-height:1;font-weight:700}
+.tcard.mode.m1{background:#e4efe8;border-color:#5f8f7f}
+.tcard.mode.m1 b, .tcard.mode.m1::after{color:var(--main-d)}
+.tcard.mode.m1:hover{background:#d5e6db}
+.tcard.mode.m2{background:#f8e8df;border-color:#c98a6c}
+.tcard.mode.m2 b, .tcard.mode.m2::after{color:#96492d}
+.tcard.mode.m2:hover{background:#f3dccf}
+.tcard.mode.on{box-shadow:0 0 0 3px rgba(47,93,80,.25)}
+.tcard.mode.m1.on{background:var(--main);border-color:var(--main)}
+.tcard.mode.m2.on{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px rgba(185,104,74,.28)}
+.tcard.mode.on b, .tcard.mode.on .sub, .tcard.mode.on::after{color:#fff}
+
+/* 선생님 모드 들어가기 */
+.teacher-entry{display:inline-flex;align-items:center;gap:10px;font:inherit;font-weight:700;font-size:1rem;cursor:pointer;
+  padding:14px 26px;border-radius:12px;border:2px solid #7d93a6;background:#e9eef3;color:#34495c}
+.teacher-entry:hover{background:#dbe4ec}
+.teacher-entry small{font-weight:400;color:#5d7285;font-size:.86rem}
+
 @media print{
   body{background:#fff}.noprint{display:none!important}.card{box-shadow:none;break-inside:avoid}
   #app{max-width:none;padding:0}
@@ -679,13 +727,13 @@ ${S.mode==="class"?`
   <div class="card">
     <h2 style="margin-top:0">어떻게 검사할까요?</h2>
     <div class="grid2">
-      <button class="tcard" style="${S.mode==="private"?pick:""}" data-act="mode" data-v="private">
+      <button class="tcard mode m1 ${S.mode==="private"?"on":""}" data-act="mode" data-v="private">
         <b>혼자 검사하기</b><span class="sub">나만 보는 결과예요.<br>어린이·청소년, 어른 모두 할 수 있어요.</span></button>
-      <button class="tcard" style="${S.mode==="class"?pick:""}" data-act="mode" data-v="class">
+      <button class="tcard mode m2 ${S.mode==="class"?"on":""}" data-act="mode" data-v="class">
         <b>반에서 검사하기</b><span class="sub">선생님이 알려 준 반 코드로 들어가요.<br>선생님과 반 친구들이 내 유형을 볼 수 있어요.</span></button>
     </div>
     ${form}
-    ${prog && prog.name ? `<p></p><button class="btn ghost wide" data-act="resume">'${esc(prog.name)}' 하던 검사 이어서 하기</button>`:""}
+    ${prog && prog.name ? `<p></p><button class="btn warm wide" data-act="resume">'${esc(prog.name)}' 하던 검사 이어서 하기</button>`:""}
     ${last ? `<p></p><button class="btn ghost wide" data-act="openrec" data-v="${esc(last.id)}">방금 한 내 결과 다시 보기 (${esc(last.name)})</button>`:""}
   </div>
   <div class="card">
@@ -722,7 +770,7 @@ ${S.mode==="class"?`
       </div>
     </div>
   </div>
-  <div class="foot noprint"><button class="linkbtn" data-act="teacher">선생님 모드${ONLINE?" (가입·로그인)":""}</button></div>`;
+  <div class="foot noprint"><button class="teacher-entry" data-act="teacher">선생님 모드${ONLINE?" <small>가입 · 로그인</small>":""}</button></div>`;
 };
 
 V.feel = () => `
