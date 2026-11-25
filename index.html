@@ -1303,9 +1303,8 @@ function teacherGuess(g){
   const counts={}; g.list.forEach(x=>{ counts[x.type]=(counts[x.type]||0)+1; });
   return `<h2>선생님은 어떤 유형일까? 활동</h2>
     <p class="sub">학생들이 선생님의 유형을 짐작해 보고 까닭을 쓰는 활동이에요. 자기 검사를 마친 학생만 참여할 수 있어요.</p>
-    ${row("학생 화면의 이 탭",g.tab,"tab","켜짐","꺼짐","꺼 두면 학생들의 우리 반 화면에 이 탭이 아예 보이지 않아요. 켜면 활동도 함께 열려요.")}
-    ${row("활동",g.open,"open","열림","닫힘","열려 있을 때만 학생이 생각을 내거나 고칠 수 있어요.")}
-    ${row("유형별 결과를 학생에게",g.revealed,"revealed","공개함","공개 안 함","공개하면 학생 화면에 유형별로 몇 명이 골랐는지 그래프가 나와요.")}
+    ${row("학생 화면의 이 탭",g.tab,"tab","켜짐","꺼짐","켜면 학생들의 우리 반 화면에 이 탭이 보이고, 바로 생각을 낼 수 있어요. 꺼 두면 탭이 아예 보이지 않아요.")}
+    ${row("유형별 결과를 학생에게",g.revealed,"revealed","공개함","공개 안 함","공개하면 학생 화면에 유형별로 몇 명이 골랐는지 그래프가 나와요. 공개한 뒤에는 학생이 글을 더 내거나 고칠 수 없어요.")}
     ${row("까닭 글을 반 친구들에게",g.whyShown,"whyShown","공개함","공개 안 함","결과를 공개했을 때 함께 보여요. 학생 이름은 빼고 글만 보여요.")}
     <p class="sub">선생님의 실제 유형을 알려 주려면 선생님 모드의 '아이들에게 내 유형 공개'를 켜 주세요. 켜면 결과를 공개한 화면에 함께 나와요.</p>
     <h2>아이들의 생각</h2>
@@ -1536,7 +1535,7 @@ function teacherOnline(){
     <div class="row noprint" style="margin-bottom:10px">
       <span>'선생님은 어떤 유형일까?' 탭: <b>${cur.gtab?"켜짐":"꺼짐"}</b></span>
       <button class="btn ghost small" data-act="tgtab">${cur.gtab?"끄기":"켜기"}</button>
-      <span class="sub">${cur.gtab?"학생들의 '우리 반 친구들' 화면에 이 탭이 보여요.":"학생들에게 이 탭이 보이지 않아요. 켜면 선생님 유형 맞혀 보기 활동이 열려요."}</span>
+      <span class="sub">${cur.gtab?"학생들의 '우리 반 친구들' 화면에 이 탭이 보여요.":"학생들에게 이 탭이 보이지 않아요. 켜면 학생들이 선생님의 유형을 짐작해서 낼 수 있어요."}</span>
     </div>
     ${tSummary(list,false)}
     <p></p><div class="row noprint">
