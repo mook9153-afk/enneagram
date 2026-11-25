@@ -666,7 +666,7 @@ const URLC = (()=>{ try{ return (new URLSearchParams(location.search).get("c")||
 const S = fresh();
 function fresh(){ return {view:"home",name:"",feel:{k:null,s:null,r:null},ans:Array(60).fill(0),qi:0,deep:[0,0,0,0],di:0,
   deepOrder:DEEP.map(()=>shuffle([1,2,3,4,5,6,7,8,9])),rec:null,show:0,openType:0,friend:0,teacher:false,from:null,mode:ONLINE&&URLC?"class":null,cls:"",tcls:ONLINE?"":"*",vcls:"",cvFrom:null,
-  aud:"kid",ccode:URLC,tok:null,tname:"",tclasses:[],tlist:[],tform:"login",cvOnline:false,cvList:null,cvMsg:"",tadmin:false,tnote:"",tpwform:false,adm:null,atemp:null,found:null,retake:false,reuseId:null,pin:"",ttype:0,ttypeEdit:false,forTeacher:false,tshow:false,cvTeacher:null,cvTab:"friends",gv:null,gvErr:"",gpick:0,gtext:"",gedit:false}; }
+  aud:"kid",ccode:URLC,tok:null,tname:"",tclasses:[],tlist:[],tform:"login",cvOnline:false,cvList:null,cvMsg:"",tadmin:false,tnote:"",tpwform:false,adm:null,atemp:null,found:null,retake:false,reuseId:null,pin:"",ttype:0,ttypeEdit:false,forTeacher:false,tshow:false,cvTeacher:null,cvTab:"friends",gv:null,gvErr:"",gpick:0,gtext:"",gedit:false,cvGuessTab:false}; }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const $app = document.getElementById("app");
@@ -1248,7 +1248,7 @@ async function applyPendType(){
 
 /* ---------- 우리 반 탭: 선생님은 어떤 유형일까? ---------- */
 function cvTabs(){
-  if(!S.cvOnline) return "";
+  if(!S.cvOnline || !(cvIsTeacher() || S.cvGuessTab)) return "";
   const tab=(v,label)=>`<span class="${(S.cvTab==="guess")===(v==="guess")?"on":""}" data-act="cvtab" data-v="${v}" style="cursor:pointer;font-size:.95rem">${label}</span>`;
   return `<div class="steps noprint" style="margin:10px 0 16px">${tab("friends","친구들 유형")}${tab("guess","선생님은 어떤 유형일까?")}</div>`;
 }
@@ -1299,10 +1299,11 @@ function studentGuess(g, me){
 function teacherGuess(g){
   const row=(label,on,key,onText,offText,hint)=>`<div class="row between" style="padding:12px 0;border-bottom:1px solid var(--line)">
       <div style="flex:1;min-width:200px"><b>${label}: ${on?onText:offText}</b><br><span class="sub">${hint}</span></div>
-      <button class="btn ${on?"ghost":""} small noprint" data-act="gset" data-v="${key}">${on?(key==="open"?"닫기":"숨기기"):(key==="open"?"열기":"공개하기")}</button></div>`;
+      <button class="btn ${on?"ghost":""} small noprint" data-act="gset" data-v="${key}">${on?(key==="open"?"닫기":key==="tab"?"끄기":"숨기기"):(key==="open"?"열기":key==="tab"?"켜기":"공개하기")}</button></div>`;
   const counts={}; g.list.forEach(x=>{ counts[x.type]=(counts[x.type]||0)+1; });
   return `<h2>선생님은 어떤 유형일까? 활동</h2>
     <p class="sub">학생들이 선생님의 유형을 짐작해 보고 까닭을 쓰는 활동이에요. 자기 검사를 마친 학생만 참여할 수 있어요.</p>
+    ${row("학생 화면의 이 탭",g.tab,"tab","켜짐","꺼짐","꺼 두면 학생들의 우리 반 화면에 이 탭이 아예 보이지 않아요. 켜면 활동도 함께 열려요.")}
     ${row("활동",g.open,"open","열림","닫힘","열려 있을 때만 학생이 생각을 내거나 고칠 수 있어요.")}
     ${row("유형별 결과를 학생에게",g.revealed,"revealed","공개함","공개 안 함","공개하면 학생 화면에 유형별로 몇 명이 골랐는지 그래프가 나와요.")}
     ${row("까닭 글을 반 친구들에게",g.whyShown,"whyShown","공개함","공개 안 함","결과를 공개했을 때 함께 보여요. 학생 이름은 빼고 글만 보여요.")}
@@ -1532,6 +1533,11 @@ function teacherOnline(){
       <button class="btn ghost small" data-act="tshare">${cur.share?"끄기":"켜기"}</button>
       <span class="sub">${cur.share?"학생들이 서로의 이름과 유형을 볼 수 있어요.":"학생들은 자기 결과만 볼 수 있어요."}</span>
     </div>
+    <div class="row noprint" style="margin-bottom:10px">
+      <span>'선생님은 어떤 유형일까?' 탭: <b>${cur.gtab?"켜짐":"꺼짐"}</b></span>
+      <button class="btn ghost small" data-act="tgtab">${cur.gtab?"끄기":"켜기"}</button>
+      <span class="sub">${cur.gtab?"학생들의 '우리 반 친구들' 화면에 이 탭이 보여요.":"학생들에게 이 탭이 보이지 않아요. 켜면 선생님 유형 맞혀 보기 활동이 열려요."}</span>
+    </div>
     ${tSummary(list,false)}
     <p></p><div class="row noprint">
       <button class="btn ghost" data-act="tguess" data-v="${cur.code}">'선생님은 어떤 유형일까?' 활동</button>
@@ -1634,14 +1640,14 @@ const A = {
   delmine(v){ if(confirm("이 결과를 이 기기에서 지울까요? 되돌릴 수 없어요.")){ store.set("ennea_records",records().filter(x=>x.id!==v)); if(S.rec&&S.rec.id===v) S.rec=null; go("home"); toast("결과를 지웠어요"); } },
   classview(v){
     if(S.view!=="classview") S.cvFrom = S.view==="teacher"?"teacher":S.view==="result"?"result":"home";
-    S.vcls=v||""; S.openType=0; S.cvOnline=ONLINE&&isCode(S.vcls); S.cvMsg=""; S.cvTab="friends"; S.gv=null; S.gvErr=""; S.gpick=0; S.gtext=""; S.gedit=false;
+    S.vcls=v||""; S.openType=0; S.cvOnline=ONLINE&&isCode(S.vcls); S.cvMsg=""; S.cvTab="friends"; S.gv=null; S.gvErr=""; S.gpick=0; S.gtext=""; S.gedit=false; S.cvGuessTab=false;
     S.cvTeacher = (ONLINE ? (S.tok && S.tcls===S.vcls) : true) && myTShow() && myTType() ? {name:ONLINE?S.tname:"",type:myTType()} : null;
     if(S.cvOnline){
       if(S.tok && S.tcls===S.vcls) S.cvList=S.tlist.map(r=>({name:r.name,t:r.chosen||calc(r).top}));
       else {
         S.cvList=null; S.cvMsg="불러오는 중이에요…";
         api("classmates",{code:S.vcls}).then(
-          j=>{ S.cvList=j.list.map(x=>({name:x.name,t:x.type})); S.cvMsg=j.share?"":"선생님이 아직 '반 친구들끼리 유형 보기'를 열지 않았어요."; S.cvTeacher=j.teacher||null; },
+          j=>{ S.cvList=j.list.map(x=>({name:x.name,t:x.type})); S.cvMsg=j.share?"":"선생님이 아직 '반 친구들끼리 유형 보기'를 열지 않았어요."; S.cvTeacher=j.teacher||null; S.cvGuessTab=!!j.guessTab; },
           e=>{ S.cvMsg=e.message; }
         ).then(()=>{ if(S.view==="classview") render(); });
       }
@@ -1848,6 +1854,7 @@ Object.assign(A,{
 Object.assign(A,{
   cvtab(v){ S.cvTab=v==="guess"?"guess":"friends"; S.gedit=false; render(); window.scrollTo(0,0); if(S.cvTab==="guess") return loadGuess(); },
   tguess(v){ A.classview(v); return A.cvtab("guess"); },
+  tgtab(){ const c=S.tclasses.find(x=>x.code===S.tcls); if(c) return tcall("setGuess",{code:c.code,tab:!c.gtab},j=>{ if(j.classes) S.tclasses=j.classes; }); },
   gpick(v){ const el=document.getElementById("gwhy"); if(el) S.gtext=el.value; S.gpick=+v; render(); },
   gedit(){ S.gedit=true; S.gpick=S.gv.mine.type; S.gtext=S.gv.mine.why; render(); },
   gcancel(){ S.gedit=false; render(); },
@@ -1862,7 +1869,7 @@ Object.assign(A,{
   },
   gset(v){
     const g=S.gv; if(!g) return;
-    return tcall("setGuess",{code:S.vcls,[v]:!g[v]},j=>{ S.gv=j; });
+    return tcall("setGuess",{code:S.vcls,[v]:!g[v]},j=>{ S.gv=j; if(j.classes) S.tclasses=j.classes; });
   }
 });
 
